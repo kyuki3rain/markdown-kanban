@@ -11,7 +11,6 @@ describe('Task', () => {
 			status: Status.create('todo')._unsafeUnwrap(),
 			path: Path.create(['仕事', 'プロジェクトA']),
 			isChecked: false,
-			lineNumber: 10,
 			metadata: {},
 		};
 		return Task.create({ ...defaultProps, ...overrides });
@@ -26,7 +25,6 @@ describe('Task', () => {
 			expect(task.status.value).toBe('todo');
 			expect(task.path.segments).toEqual(['仕事', 'プロジェクトA']);
 			expect(task.isChecked).toBe(false);
-			expect(task.lineNumber).toBe(10);
 		});
 
 		it('should create a Task with metadata', () => {

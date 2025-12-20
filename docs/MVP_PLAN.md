@@ -88,7 +88,7 @@ src/
 #### 2.1 エンティティ・値オブジェクト
 
 - [x] `Task` エンティティの定義
-  - id, title, status, path, checkbox状態, lineNumber, メタデータ
+  - id, title, status, path, checkbox状態, メタデータ
 - [x] `Path` 値オブジェクトの定義
   - 見出し階層を表現、親子関係、プレフィックス判定
 - [x] `Status` 値オブジェクトの定義

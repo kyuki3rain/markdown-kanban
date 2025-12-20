@@ -78,6 +78,9 @@ VSCode拡張の初期構築には公式推奨のツールを使用する。
 | バリデーション | Zod | スキーマ定義・バリデーション |
 | エラーハンドリング | neverthrow | Result型によるエラー管理 |
 | ロギング | カスタムLogger | VSCode OutputChannel統合 |
+| Markdownパース | remark + remark-gfm | AST生成、GFM対応 |
+| フロントマター | gray-matter | YAMLフロントマターのパース |
+| D&D | @dnd-kit/core | React用ドラッグ&ドロップ |
 
 ---
 

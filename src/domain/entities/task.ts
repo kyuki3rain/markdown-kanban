@@ -15,7 +15,6 @@ export interface TaskProps {
 	status: Status;
 	path: Path;
 	isChecked: boolean;
-	lineNumber: number;
 	metadata: TaskMetadata;
 }
 
@@ -30,7 +29,6 @@ export class Task {
 		private readonly _status: Status,
 		private readonly _path: Path,
 		private readonly _isChecked: boolean,
-		private readonly _lineNumber: number,
 		private readonly _metadata: TaskMetadata,
 	) {}
 
@@ -38,15 +36,9 @@ export class Task {
 	 * タスクを作成する
 	 */
 	static create(props: TaskProps): Task {
-		return new Task(
-			props.id,
-			props.title,
-			props.status,
-			props.path,
-			props.isChecked,
-			props.lineNumber,
-			{ ...props.metadata },
-		);
+		return new Task(props.id, props.title, props.status, props.path, props.isChecked, {
+			...props.metadata,
+		});
 	}
 
 	get id(): string {
@@ -69,10 +61,6 @@ export class Task {
 		return this._isChecked;
 	}
 
-	get lineNumber(): number {
-		return this._lineNumber;
-	}
-
 	get metadata(): TaskMetadata {
 		return { ...this._metadata };
 	}
@@ -89,7 +77,7 @@ export class Task {
 			newIsChecked = newStatus.isDone(doneStatuses);
 		}
 
-		return new Task(this._id, this._title, newStatus, this._path, newIsChecked, this._lineNumber, {
+		return new Task(this._id, this._title, newStatus, this._path, newIsChecked, {
 			...this._metadata,
 		});
 	}
@@ -98,60 +86,36 @@ export class Task {
 	 * タイトルを更新する
 	 */
 	updateTitle(newTitle: string): Task {
-		return new Task(
-			this._id,
-			newTitle,
-			this._status,
-			this._path,
-			this._isChecked,
-			this._lineNumber,
-			{ ...this._metadata },
-		);
+		return new Task(this._id, newTitle, this._status, this._path, this._isChecked, {
+			...this._metadata,
+		});
 	}
 
 	/**
 	 * パスを更新する
 	 */
 	updatePath(newPath: Path): Task {
-		return new Task(
-			this._id,
-			this._title,
-			this._status,
-			newPath,
-			this._isChecked,
-			this._lineNumber,
-			{ ...this._metadata },
-		);
+		return new Task(this._id, this._title, this._status, newPath, this._isChecked, {
+			...this._metadata,
+		});
 	}
 
 	/**
 	 * メタデータを更新する
 	 */
 	updateMetadata(newMetadata: TaskMetadata): Task {
-		return new Task(
-			this._id,
-			this._title,
-			this._status,
-			this._path,
-			this._isChecked,
-			this._lineNumber,
-			{ ...newMetadata },
-		);
+		return new Task(this._id, this._title, this._status, this._path, this._isChecked, {
+			...newMetadata,
+		});
 	}
 
 	/**
 	 * チェック状態をトグルする
 	 */
 	toggleCheck(): Task {
-		return new Task(
-			this._id,
-			this._title,
-			this._status,
-			this._path,
-			!this._isChecked,
-			this._lineNumber,
-			{ ...this._metadata },
-		);
+		return new Task(this._id, this._title, this._status, this._path, !this._isChecked, {
+			...this._metadata,
+		});
 	}
 
 	/**
