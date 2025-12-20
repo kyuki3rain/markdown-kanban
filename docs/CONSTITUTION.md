@@ -70,14 +70,14 @@ VSCode拡張の初期構築には公式推奨のツールを使用する。
 | 項目 | 採用技術 | 用途 |
 |------|----------|------|
 | WebView UI | React | ボードUIの構築 |
-| CSSフレームワーク | Tailwind CSS v3 | スタイリング |
+| CSSフレームワーク | Tailwind CSS v4 | スタイリング |
 | UIコンポーネント | shadcn/ui | 再利用可能なUIコンポーネント |
 | ビルドツール | Vite | バンドル・開発サーバー |
 | テスト | Vitest | ユニットテスト・統合テスト |
 | Linter/Formatter | Biome | コード品質・フォーマット |
 | バリデーション | Zod | スキーマ定義・バリデーション |
 | エラーハンドリング | neverthrow | Result型によるエラー管理 |
-| ロギング | tslog | 構造化ログ出力 |
+| ロギング | カスタムLogger | VSCode OutputChannel統合 |
 
 ---
 
@@ -260,9 +260,10 @@ export const getTask = (taskId: string): Result<Task, TaskNotFoundError> => {
 
 ## ロギング
 
-### ライブラリ
+### 実装
 
-tslogを使用し、VSCodeのOutputChannelに出力する。
+カスタムLoggerを使用し、VSCodeのOutputChannelに出力する。
+実装は `src/shared/logger/` に配置。
 
 ### ログレベルと出力場所
 
@@ -357,7 +358,9 @@ export type TaskDTO = z.infer<typeof TaskSchema>;
 
 ### スタイリング
 
-- **Tailwind CSS v3**: ユーティリティファーストのCSSフレームワーク
+- **Tailwind CSS v4**: ユーティリティファーストのCSSフレームワーク
+  - `@tailwindcss/vite` プラグインを使用（PostCSS不要）
+  - CSS変数はoklch形式
 - **shadcn/ui**: カスタマイズ可能なUIコンポーネント集
   - コンポーネントは直接プロジェクトにコピーされる方式
   - 必要なコンポーネントのみ追加
