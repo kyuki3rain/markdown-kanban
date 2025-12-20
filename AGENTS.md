@@ -155,8 +155,8 @@ src/
 ## 現在のステータス
 
 - **バージョン**: 0.0.1（開発中）
-- **状態**: Phase 2（ドメイン層の実装）完了
-- **次のステップ**: Phase 3（Markdownパーサーの実装）へ
+- **状態**: Phase 3（Markdownパーサーの実装）完了
+- **次のステップ**: Phase 4（アプリケーション層の実装）へ
 
 ### 完了済みフェーズ
 
@@ -172,6 +172,13 @@ src/
   - ドメインエラー: InvalidStatusError, TaskParseError, TaskNotFoundError
   - ポート: TaskRepository, ConfigProvider
   - 57件のユニットテスト
+
+- ✅ Phase 3: Markdownパーサーの実装
+  - MarkdownParser: チェックボックス認識、見出し階層解析、メタデータ抽出
+  - MarkdownSerializer: タスクの更新・作成・削除（部分編集）
+  - フロントマターからの設定読み込み
+  - タスクID生成・重複検出
+  - 42件のユニットテスト（計102件）
 
 ---
 
