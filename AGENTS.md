@@ -35,14 +35,14 @@
 | ランタイム | Node.js 24 |
 | パッケージマネージャ | pnpm |
 | WebView UI | React |
-| CSSフレームワーク | Tailwind CSS v3 |
+| CSSフレームワーク | Tailwind CSS v4 |
 | UIコンポーネント | shadcn/ui |
 | ビルドツール | Vite |
 | テスト | Vitest |
 | Linter/Formatter | Biome |
 | バリデーション | Zod |
 | エラーハンドリング | neverthrow（Result型） |
-| ロギング | tslog |
+| ロギング | カスタムLogger（VSCode OutputChannel統合） |
 
 ---
 
