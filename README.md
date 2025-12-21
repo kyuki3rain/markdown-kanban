@@ -1,71 +1,114 @@
-# markdown-kanban README
+# Markdown Kanban
 
-This is the README for your extension "markdown-kanban". After writing up a brief description, we recommend including the following sections.
+Markdownファイル内のTODOリスト（チェックボックス）をカンバンボード形式で表示・操作できるVSCode拡張機能です。
 
-## Features
+## 特徴
 
-Describe specific features of your extension including screenshots of your extension in action. Image paths are relative to this README file.
+- **Markdownネイティブ**: Markdownの標準記法を尊重し、素のMarkdownとしても可読性を維持
+- **見出し階層をパスとして活用**: 見出し階層を「パス」として解釈し、タスクのグルーピングに使用
+- **WebViewカンバンボード**: WebViewパネルでカンバンボードを表示
+- **双方向同期**: エディタとボードの双方向同期
 
-For example if there is an image subfolder under your extension project workspace:
+## 使い方
 
-\!\[feature X\]\(images/feature-x.png\)
+### 基本的なMarkdown記法
 
-> Tip: Many popular extensions utilize animations. This is an excellent way to show off your extension! We recommend short, focused animations that are easy to follow.
+```markdown
+# プロジェクト
 
-## Requirements
+## フロントエンド
 
-If you have any requirements or dependencies, add a section describing those and how to install and configure them.
+- [ ] UI設計
+- [x] コンポーネント実装
+  - status: done
 
-## Extension Settings
+## バックエンド
 
-Include if your extension adds any VS Code settings through the `contributes.configuration` extension point.
+- [ ] API設計
+  - status: todo
+  - priority: high
+```
 
-For example:
+### ステータス管理
 
-This extension contributes the following settings:
+タスクの子要素として `- status: <ステータス>` を記述することで、カスタムステータスを設定できます。
 
-* `myExtension.enable`: Enable/disable this extension.
-* `myExtension.thing`: Set to `blah` to do something.
+### カンバンボードの表示
 
-## Known Issues
+コマンドパレット（`Cmd+Shift+P` / `Ctrl+Shift+P`）から「Markdown Kanban: Open Kanban Board」を実行します。
 
-Calling out known issues can help limit users opening duplicate issues against your extension.
+## 拡張機能の設定
 
-## Release Notes
+この拡張機能は以下の設定に対応しています：
 
-Users appreciate release notes as you update your extension.
+| 設定項目 | 説明 | デフォルト値 |
+|---------|------|-------------|
+| `markdownKanban.statuses` | 利用可能なステータス一覧 | `["todo", "in-progress", "done"]` |
+| `markdownKanban.doneStatuses` | 完了とみなすステータス | `["done"]` |
+| `markdownKanban.defaultStatus` | 新規タスクのデフォルトステータス | `"todo"` |
+| `markdownKanban.defaultDoneStatus` | タスク完了時のデフォルトステータス | `"done"` |
+| `markdownKanban.sortBy` | タスクのソート基準 | `"none"` |
+| `markdownKanban.syncCheckboxWithDone` | チェックボックスと完了ステータスを連動 | `true` |
 
-### 1.0.0
+### フロントマターでの設定
 
-Initial release of ...
+Markdownファイルのフロントマターで、ファイル固有の設定を上書きできます：
 
-### 1.0.1
-
-Fixed issue #.
-
-### 1.1.0
-
-Added features X, Y, and Z.
-
+```yaml
 ---
+kanban:
+  statuses: [backlog, doing, review, done]
+  doneStatuses: [done]
+  defaultStatus: backlog
+  syncCheckboxWithDone: true
+---
+```
 
-## Following extension guidelines
+## 開発
 
-Ensure that you've read through the extensions guidelines and follow the best practices for creating your extension.
+### 必要条件
 
-* [Extension Guidelines](https://code.visualstudio.com/api/references/extension-guidelines)
+- Node.js 24
+- pnpm
 
-## Working with Markdown
+### セットアップ
 
-You can author your README using Visual Studio Code. Here are some useful editor keyboard shortcuts:
+```bash
+pnpm install
+```
 
-* Split the editor (`Cmd+\` on macOS or `Ctrl+\` on Windows and Linux).
-* Toggle preview (`Shift+Cmd+V` on macOS or `Shift+Ctrl+V` on Windows and Linux).
-* Press `Ctrl+Space` (Windows, Linux, macOS) to see a list of Markdown snippets.
+### ビルド
 
-## For more information
+```bash
+pnpm run compile
+```
 
-* [Visual Studio Code's Markdown Support](http://code.visualstudio.com/docs/languages/markdown)
-* [Markdown Syntax Reference](https://help.github.com/articles/markdown-basics/)
+### テスト
 
-**Enjoy!**
+```bash
+pnpm run test
+```
+
+### 開発モード
+
+```bash
+pnpm run watch
+```
+
+## 技術スタック
+
+- TypeScript（strict mode）
+- React（WebView UI）
+- Tailwind CSS v4
+- shadcn/ui
+- Vite
+- Vitest
+- Biome
+
+## ライセンス
+
+MIT
+
+## 変更履歴
+
+[CHANGELOG.md](./CHANGELOG.md) を参照してください。

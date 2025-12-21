@@ -90,12 +90,6 @@ export class Container {
 	 * Adaptersを初期化
 	 */
 	private initializeAdapters(): void {
-		// MarkdownTaskRepository
-		this.markdownTaskRepository = new MarkdownTaskRepository(
-			this.markdownTaskClient,
-			this.vscodeDocumentClient,
-		);
-
 		// VscodeConfigProvider
 		this.vscodeConfigProvider = new VscodeConfigProvider(this.vscodeConfigClient);
 
@@ -104,6 +98,13 @@ export class Container {
 			this.markdownTaskClient,
 			this.vscodeDocumentClient,
 			this.vscodeConfigProvider,
+		);
+
+		// MarkdownTaskRepository（ConfigProviderを注入してdoneStatuses連動を有効化）
+		this.markdownTaskRepository = new MarkdownTaskRepository(
+			this.markdownTaskClient,
+			this.vscodeDocumentClient,
+			this.frontmatterConfigProvider,
 		);
 	}
 

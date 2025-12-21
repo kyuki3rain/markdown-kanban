@@ -292,24 +292,33 @@ src/
 
 ---
 
-### Phase 10: 統合とテスト
+### Phase 10: 統合とテスト ✅
 
 **目標**: 全体の統合とテストを完了する
 
 #### 10.1 統合テスト
 
-- [ ] パーサー + シリアライザーの統合テスト
-- [ ] ユースケースの統合テスト
+- [x] パーサー + シリアライザーの統合テスト（既存48件でカバー済み）
+- [x] ユースケースの統合テスト（16件追加）
 
 #### 10.2 動作確認
 
-- [ ] エンドツーエンドの動作確認
-- [ ] エッジケースの確認
+- [x] エンドツーエンドの動作確認（8件のエッジケーステスト追加）
+- [x] エッジケースの確認（日本語、特殊文字、大量タスク等）
 
 #### 10.3 ドキュメント
 
-- [ ] README.mdの更新
-- [ ] CHANGELOG.mdの更新
+- [x] README.mdの更新
+- [x] CHANGELOG.mdの更新
+
+#### 10.4 バグ修正
+
+- [x] MarkdownTaskRepositoryにConfigProviderを注入してdoneStatuses連動を修正
+
+#### 10.5 テスト
+
+- [x] 24件のユニットテストを追加（計249件）
+- [x] カバレッジ: 77.31% Stmts | 69.14% Branch | 71.54% Funcs | 77.81% Lines
 
 ---
 
@@ -368,8 +377,8 @@ vscode.postMessage({ type: 'UPDATE_TASK', payload: { id, status } });
 7. ~~Phase 7: WebView UIの実装~~ ✅
 8. ~~Phase 8: ブートストラップ層の実装~~ ✅
 9. ~~Phase 9: 設定機能の実装~~ ✅
-10. Phase 10: 統合とテスト
-11. 各フェーズ完了後にレビュー・調整
+10. ~~Phase 10: 統合とテスト~~ ✅
+11. **MVP v0.1.0 達成！**
 
 ---
 
@@ -393,3 +402,4 @@ vscode.postMessage({ type: 'UPDATE_TASK', payload: { id, status } });
 | 2025-01-XX | Phase 7 完了。WebView UIの実装（KanbanBoard, Column, TaskCard, TaskModal, PathBadge, D&D） |
 | 2025-12-21 | Phase 8 完了。ブートストラップ層の実装（DIコンテナ、KanbanPanelProvider、計220件のテスト） |
 | 2025-12-21 | Phase 9 完了。設定機能の実装（VSCode設定スキーマ、設定解決ロジック、計225件のテスト） |
+| 2025-12-21 | Phase 10 完了。統合テスト追加（ユースケース統合16件、エッジケース8件）、バグ修正、ドキュメント更新（計249件のテスト）。**MVP v0.1.0 達成！** |

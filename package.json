@@ -55,7 +55,11 @@
           "items": {
             "type": "string"
           },
-          "default": ["todo", "in-progress", "done"],
+          "default": [
+            "todo",
+            "in-progress",
+            "done"
+          ],
           "description": "ステータス一覧（カラムの表示順）"
         },
         "markdownKanban.doneStatuses": {
@@ -63,7 +67,9 @@
           "items": {
             "type": "string"
           },
-          "default": ["done"],
+          "default": [
+            "done"
+          ],
           "description": "完了扱いとするステータス"
         },
         "markdownKanban.defaultStatus": {
@@ -78,7 +84,12 @@
         },
         "markdownKanban.sortBy": {
           "type": "string",
-          "enum": ["markdown", "priority", "due", "alphabetical"],
+          "enum": [
+            "markdown",
+            "priority",
+            "due",
+            "alphabetical"
+          ],
           "default": "markdown",
           "enumDescriptions": [
             "ファイル内の出現順",
@@ -124,6 +135,7 @@
     "@types/mocha": "^10.0.10",
     "@types/node": "22.x",
     "@types/vscode": "^1.107.0",
+    "@vitest/coverage-v8": "^4.0.16",
     "@vscode/test-cli": "^0.0.12",
     "@vscode/test-electron": "^2.5.2",
     "esbuild": "^0.27.1",
