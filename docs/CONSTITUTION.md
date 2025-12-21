@@ -131,6 +131,38 @@ Client（外部システムラッパー）
 外部システム（VSCode API, remark, ファイルシステム等）
 ```
 
+### Port の種類と配置
+
+ヘキサゴナルアーキテクチャにおけるPort分類：
+
+| Port種類 | 定義場所 | 実装場所 | 役割 | 例 |
+|---------|---------|---------|------|-----|
+| **Driving Port（駆動側）** | Application層 | Interface層 | 外部→アプリを呼び出す入口 | TaskController |
+| **Driven Port（被駆動側）** | Domain層 | Infrastructure層 | アプリ→外部を呼び出す出口 | TaskRepository, ConfigProvider |
+
+```
+┌──────────────────────────────────────────────────────────────┐
+│                        Interface層                           │
+│  Adapter: TaskController, WebViewMessageHandler              │
+│          ↓ implements                                        │
+├──────────────────────────────────────────────────────────────┤
+│                       Application層                          │
+│  Driving Port: ← 外部からの呼び出しを受ける                    │
+│  UseCase: GetTasksUseCase, UpdateTaskUseCase                 │
+│          ↓ uses                                              │
+├──────────────────────────────────────────────────────────────┤
+│                        Domain層                              │
+│  Driven Port: → 外部リソースへアクセスする契約                  │
+│  Port: TaskRepository, ConfigProvider                        │
+│          ↑ implements                                        │
+├──────────────────────────────────────────────────────────────┤
+│                    Infrastructure層                          │
+│  Adapter: MarkdownTaskRepository, VscodeConfigProvider       │
+│          ↓ uses                                              │
+│  Client: RemarkClient, VscodeDocumentClient                  │
+└──────────────────────────────────────────────────────────────┘
+```
+
 #### 配置ルール
 
 - **Client**: 外部システム・層境界ごとに1つ
