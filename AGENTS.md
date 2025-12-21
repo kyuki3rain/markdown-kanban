@@ -172,8 +172,8 @@ src/
 ## 現在のステータス
 
 - **バージョン**: 0.0.1（開発中）
-- **状態**: Phase 5（インフラストラクチャ層の実装）完了
-- **次のステップ**: Phase 6（インターフェース層の実装）へ
+- **状態**: Phase 6（インターフェース層の実装）完了
+- **次のステップ**: Phase 7（WebView UIの実装）へ
 
 ### 完了済みフェーズ
 
@@ -215,6 +215,14 @@ src/
   - VscodeConfigProvider: ConfigProviderの実装（VSCode設定）
   - FrontmatterConfigProvider: ConfigProviderの実装（フロントマター）
   - 38件のユニットテスト（計171件）
+
+- ✅ Phase 6: インターフェース層の実装
+  - WebViewMessageClient: WebViewへのメッセージ送受信
+  - TaskController: タスク操作のエントリーポイント
+  - ConfigController: 設定操作のエントリーポイント
+  - WebViewMessageHandler: WebViewからのメッセージハンドリング
+  - メッセージ型定義（Extension ⇔ WebView間の通信プロトコル）
+  - 35件のユニットテスト（計206件）
 
 ---
 
