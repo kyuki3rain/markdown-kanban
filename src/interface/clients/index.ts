@@ -1,2 +1,2 @@
 // Interface Clients
-export {};
+export { WebViewMessageClient, type WebViewMessageDeps } from './webViewMessageClient';

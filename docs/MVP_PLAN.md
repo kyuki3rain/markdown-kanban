@@ -192,19 +192,28 @@ src/
 
 ---
 
-### Phase 6: インターフェース層の実装
+### Phase 6: インターフェース層の実装 ✅
 
 **目標**: 外部からのリクエストを受け付け、ユースケースを呼び出す
 
 #### 6.1 Client実装（外部通信）
 
-- [ ] `WebViewMessageClient` - WebViewへのメッセージ送受信
+- [x] `WebViewMessageClient` - WebViewへのメッセージ送受信
 
 #### 6.2 Adapter実装（Portの実装）
 
-- [ ] `TaskController` - タスク操作のエントリーポイント
-- [ ] `ConfigController` - 設定操作のエントリーポイント
-- [ ] `WebViewMessageHandler` - WebViewからのメッセージハンドリング
+- [x] `TaskController` - タスク操作のエントリーポイント
+- [x] `ConfigController` - 設定操作のエントリーポイント
+- [x] `WebViewMessageHandler` - WebViewからのメッセージハンドリング
+
+#### 6.3 型定義
+
+- [x] メッセージ型（Extension ⇔ WebView間の通信プロトコル）
+- [x] TaskDto（タスクのデータ転送オブジェクト）
+
+#### 6.4 テスト
+
+- [x] 35件のユニットテストを追加（計206件）
 
 ---
 
@@ -346,8 +355,9 @@ vscode.postMessage({ type: 'UPDATE_TASK', payload: { id, status } });
 3. ~~Phase 3: Markdownパーサーの実装~~ ✅
 4. ~~Phase 4: アプリケーション層の実装~~ ✅
 5. ~~Phase 5: インフラストラクチャ層の実装~~ ✅
-6. Phase 6: インターフェース層の実装
-7. 各フェーズ完了後にレビュー・調整
+6. ~~Phase 6: インターフェース層の実装~~ ✅
+7. Phase 7: WebView UIの実装
+8. 各フェーズ完了後にレビュー・調整
 
 ---
 
@@ -366,3 +376,5 @@ vscode.postMessage({ type: 'UPDATE_TASK', payload: { id, status } });
 | 2025-01-XX | Phase 1, 2 完了。Phase 3 詳細化（タスクID生成、重複検出、部分編集方針） |
 | 2025-01-XX | Phase 3 完了。MarkdownParser、MarkdownSerializer実装（計42件のテスト） |
 | 2025-01-XX | Phase 4 完了。6つのユースケース実装（計133件のテスト） |
+| 2025-01-XX | Phase 5 完了。インフラストラクチャ層のアダプター実装（計171件のテスト） |
+| 2025-01-XX | Phase 6 完了。インターフェース層の実装（計206件のテスト） |
