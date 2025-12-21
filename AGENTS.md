@@ -191,11 +191,13 @@ src/
   - 57件のユニットテスト
 
 - ✅ Phase 3: Markdownパーサーの実装
-  - MarkdownParser: チェックボックス認識、見出し階層解析、メタデータ抽出
-  - MarkdownSerializer: タスクの更新・作成・削除（部分編集）
+  - RemarkClient: remark/gray-matterのラッパー
+  - MarkdownTaskAdapter: パース・シリアライズ（Client/Adapter構成）
+  - チェックボックス認識、見出し階層解析、メタデータ抽出
+  - タスクの更新・作成・削除（部分編集、元の書式を保持）
   - フロントマターからの設定読み込み
   - タスクID生成・重複検出
-  - 42件のユニットテスト（計102件）
+  - 48件の統合テスト（計108件）
 
 ---
 

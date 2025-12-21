@@ -146,7 +146,7 @@ src/
 
 #### 3.5 テスト
 
-- [x] 42件のユニットテストを実装（MarkdownParser: 28件、MarkdownSerializer: 14件）
+- [x] 48件の統合テストを実装（MarkdownTaskAdapter）
 
 ---
 
@@ -171,13 +171,14 @@ src/
 
 #### 5.1 Client実装（外部システムラッパー）
 
-- [ ] `RemarkClient` - remark/AST操作のラッパー
+- [x] `RemarkClient` - remark/AST操作のラッパー（Phase 3で実装済み）
 - [ ] `VscodeDocumentClient` - VSCodeドキュメント操作
 - [ ] `VscodeWorkspaceClient` - WorkspaceEdit API操作
 
 #### 5.2 Adapter実装（Portの実装）
 
-- [ ] `MarkdownTaskRepository` - TaskRepositoryの実装（RemarkClientを使用）
+- [x] `MarkdownTaskAdapter` - Markdownパース・編集（Phase 3で実装済み）
+- [ ] `MarkdownTaskRepository` - TaskRepositoryの実装（MarkdownTaskAdapterを使用）
 - [ ] `VscodeConfigProvider` - ConfigProviderの実装（VSCode設定）
 - [ ] `FrontmatterConfigProvider` - ConfigProviderの実装（フロントマター）
 
