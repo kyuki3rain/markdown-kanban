@@ -217,27 +217,28 @@ src/
 
 ---
 
-### Phase 7: WebView UIの実装
+### Phase 7: WebView UIの実装 ✅
 
 **目標**: カンバンボードUIをReactで実装する
 
 #### 7.1 コンポーネント
 
-- [ ] `KanbanBoard` - ボード全体
-- [ ] `Column` - ステータスカラム
-- [ ] `TaskCard` - タスクカード
-- [ ] `TaskModal` - タスク作成・編集モーダル
-- [ ] `PathBadge` - パスバッジ
+- [x] `KanbanBoard` - ボード全体
+- [x] `Column` - ステータスカラム
+- [x] `TaskCard` - タスクカード
+- [x] `TaskModal` - タスク作成・編集モーダル
+- [x] `PathBadge` - パスバッジ
 
 #### 7.2 ドラッグ&ドロップ
 
-- [ ] 列間のドラッグ&ドロップ実装
-- [ ] ステータス変更の反映
+- [x] 列間のドラッグ&ドロップ実装（@dnd-kit/core使用）
+- [x] ステータス変更の反映
 
 #### 7.3 Extension通信
 
-- [ ] カスタムフック `useVscodeApi` の実装
-- [ ] メッセージ送受信の実装
+- [x] カスタムフック `useVscodeApi` の実装（型安全化）
+- [x] カスタムフック `useKanban` の実装（状態管理）
+- [x] メッセージ送受信の実装
 
 ---
 
@@ -356,8 +357,9 @@ vscode.postMessage({ type: 'UPDATE_TASK', payload: { id, status } });
 4. ~~Phase 4: アプリケーション層の実装~~ ✅
 5. ~~Phase 5: インフラストラクチャ層の実装~~ ✅
 6. ~~Phase 6: インターフェース層の実装~~ ✅
-7. Phase 7: WebView UIの実装
-8. 各フェーズ完了後にレビュー・調整
+7. ~~Phase 7: WebView UIの実装~~ ✅
+8. Phase 8: ブートストラップ層の実装
+9. 各フェーズ完了後にレビュー・調整
 
 ---
 
@@ -378,3 +380,4 @@ vscode.postMessage({ type: 'UPDATE_TASK', payload: { id, status } });
 | 2025-01-XX | Phase 4 完了。6つのユースケース実装（計133件のテスト） |
 | 2025-01-XX | Phase 5 完了。インフラストラクチャ層のアダプター実装（計171件のテスト） |
 | 2025-01-XX | Phase 6 完了。インターフェース層の実装（計206件のテスト） |
+| 2025-01-XX | Phase 7 完了。WebView UIの実装（KanbanBoard, Column, TaskCard, TaskModal, PathBadge, D&D） |
