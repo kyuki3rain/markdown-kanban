@@ -122,7 +122,15 @@ export class MarkdownTaskAdapter {
 		const warnings: string[] = [];
 
 		// ASTを走査
-		this.walkNodes(tree.children, headingStack, headings, tasks, frontmatterLineCount, config);
+		this.walkNodes(
+			tree.children,
+			headingStack,
+			headings,
+			tasks,
+			frontmatterLineCount,
+			content,
+			config,
+		);
 
 		// 重複タスクを検出
 		this.detectDuplicates(tasks, warnings);
@@ -203,6 +211,7 @@ export class MarkdownTaskAdapter {
 		headings: Path[],
 		tasks: ParsedTask[],
 		lineOffset: number,
+		content: string,
 		config?: FrontmatterConfig,
 		isInBlockquote = false,
 	): void {
@@ -225,7 +234,7 @@ export class MarkdownTaskAdapter {
 
 			// リストを処理
 			if (node.type === 'list') {
-				this.processList(node, headingStack, tasks, lineOffset, config, isInBlockquote);
+				this.processList(node, headingStack, tasks, lineOffset, content, config, isInBlockquote);
 			}
 		}
 	}
@@ -263,6 +272,7 @@ export class MarkdownTaskAdapter {
 		headingStack: { level: number; text: string }[],
 		tasks: ParsedTask[],
 		lineOffset: number,
+		content: string,
 		config?: FrontmatterConfig,
 		isInBlockquote = false,
 	): void {
@@ -276,7 +286,15 @@ export class MarkdownTaskAdapter {
 				// 子リストがあれば処理（通常のリスト内のチェックボックス）
 				for (const child of item.children) {
 					if (child.type === 'list') {
-						this.processList(child, headingStack, tasks, lineOffset, config, isInBlockquote);
+						this.processList(
+							child,
+							headingStack,
+							tasks,
+							lineOffset,
+							content,
+							config,
+							isInBlockquote,
+						);
 					}
 				}
 				continue;
@@ -288,7 +306,7 @@ export class MarkdownTaskAdapter {
 			}
 
 			// タスクを抽出
-			const task = this.extractTask(item, headingStack, lineOffset, config);
+			const task = this.extractTask(item, headingStack, lineOffset, content, config);
 			if (task) {
 				tasks.push(task);
 			}
@@ -302,18 +320,33 @@ export class MarkdownTaskAdapter {
 		item: ListItem,
 		headingStack: { level: number; text: string }[],
 		lineOffset: number,
+		content: string,
 		config?: FrontmatterConfig,
 	): ParsedTask | null {
 		const isChecked = item.checked === true;
 
-		// タイトルを抽出（最初のParagraphから）
+		// タイトルを抽出（最初のParagraphから、元のMarkdownソースを保持）
 		let title = '';
 		let metadata: TaskMetadata = {};
 		let endLine = item.position?.end.line ?? 0;
 
 		for (const child of item.children) {
 			if (child.type === 'paragraph' && title === '') {
-				title = this.extractTextFromNodes(child.children);
+				// positionからオリジナルのMarkdownを抽出
+				if (
+					child.position?.start.offset !== undefined &&
+					child.position?.end.offset !== undefined
+				) {
+					let rawTitle = content
+						.slice(child.position.start.offset, child.position.end.offset)
+						.trim();
+					// チェックボックスパターンを除去（mdastのParagraphにはチェックボックスが含まれる）
+					rawTitle = rawTitle.replace(/^\[[ xX]\]\s*/, '');
+					title = rawTitle;
+				} else {
+					// フォールバック: テキスト抽出
+					title = this.extractTextFromNodes(child.children);
+				}
 			} else if (child.type === 'list') {
 				// 子リストからメタデータを抽出
 				const extracted = this.extractMetadata(child);

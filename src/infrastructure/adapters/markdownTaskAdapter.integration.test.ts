@@ -258,33 +258,32 @@ describe('MarkdownTaskAdapter', () => {
 		});
 
 		describe('タスクタイトル内のMarkdown書式', () => {
-			// NOTE: パーサーはASTからプレーンテキストを抽出する
-			// Markdown書式はUI側でレンダリング時に処理される
-			it('太字を含むタスクタイトルはプレーンテキストとして抽出される', () => {
+			// NOTE: タイトルはrawなMarkdownとして保持される
+			// UI側でMarkdownとしてレンダリングする
+			it('太字を含むタスクタイトルはMarkdownとして保持される', () => {
 				const markdown = '- [ ] **重要な**タスク';
 				const result = adapter.parse(markdown);
 
 				expect(result.isOk()).toBe(true);
 				const { tasks } = result._unsafeUnwrap();
-				expect(tasks[0].title).toBe('重要なタスク');
+				expect(tasks[0].title).toBe('**重要な**タスク');
 			});
 
-			it('リンクを含むタスクタイトルはリンクテキストのみ抽出される', () => {
+			it('リンクを含むタスクタイトルはMarkdownとして保持される', () => {
 				const markdown = '- [ ] [ドキュメント](https://example.com)を読む';
 				const result = adapter.parse(markdown);
 
 				expect(result.isOk()).toBe(true);
 				const { tasks } = result._unsafeUnwrap();
-				expect(tasks[0].title).toBe('ドキュメントを読む');
+				expect(tasks[0].title).toBe('[ドキュメント](https://example.com)を読む');
 			});
 
-			it('インラインコードを含むタスクタイトルはバッククォート含めて保持される', () => {
+			it('インラインコードを含むタスクタイトルはMarkdownとして保持される', () => {
 				const markdown = '- [ ] `API`の修正';
 				const result = adapter.parse(markdown);
 
 				expect(result.isOk()).toBe(true);
 				const { tasks } = result._unsafeUnwrap();
-				// インラインコードはバッククォート含めて保持される
 				expect(tasks[0].title).toBe('`API`の修正');
 			});
 		});
