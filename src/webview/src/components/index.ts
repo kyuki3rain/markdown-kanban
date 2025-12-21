@@ -1,1 +1,2 @@
-// UI Components
+// Kanban Components
+export * from './kanban';
