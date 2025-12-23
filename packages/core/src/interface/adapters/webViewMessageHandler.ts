@@ -1,8 +1,8 @@
-import type { VscodeDocumentClient } from '../../infrastructure/clients/vscodeDocumentClient';
 import { logger } from '../../shared';
 import type { WebViewMessageClient } from '../clients/webViewMessageClient';
 import type { WebViewToExtensionMessage } from '../types/messages';
 import type { ConfigController } from './configController';
+import type { DocumentController } from './documentController';
 import type { TaskController } from './taskController';
 
 /**
@@ -14,7 +14,7 @@ export class WebViewMessageHandler {
 		private readonly taskController: TaskController,
 		private readonly configController: ConfigController,
 		private readonly messageClient: WebViewMessageClient,
-		private readonly documentClient?: VscodeDocumentClient,
+		private readonly documentController?: DocumentController,
 	) {}
 
 	/**
@@ -152,13 +152,13 @@ export class WebViewMessageHandler {
 	 * ドキュメント保存を処理する
 	 */
 	private async handleSaveDocument(): Promise<void> {
-		if (!this.documentClient) {
-			logger.error('Document client is not available');
-			this.messageClient.sendError('ドキュメントクライアントが利用できません');
+		if (!this.documentController) {
+			logger.error('Document controller is not available');
+			this.messageClient.sendError('ドキュメントコントローラーが利用できません');
 			return;
 		}
 
-		const result = await this.documentClient.saveDocument();
+		const result = await this.documentController.saveDocument();
 
 		if (result.isErr()) {
 			this.sendError(result.error);
@@ -171,13 +171,13 @@ export class WebViewMessageHandler {
 	 * ドキュメント破棄を処理する
 	 */
 	private async handleRevertDocument(): Promise<void> {
-		if (!this.documentClient) {
-			logger.error('Document client is not available');
-			this.messageClient.sendError('ドキュメントクライアントが利用できません');
+		if (!this.documentController) {
+			logger.error('Document controller is not available');
+			this.messageClient.sendError('ドキュメントコントローラーが利用できません');
 			return;
 		}
 
-		const result = await this.documentClient.revertDocument();
+		const result = await this.documentController.revertDocument();
 
 		if (result.isErr()) {
 			this.sendError(result.error);
@@ -190,9 +190,9 @@ export class WebViewMessageHandler {
 	 * エラーを送信する
 	 */
 	private sendError(error: Error & { _tag?: string }): void {
-		// NoActiveEditorErrorは正常な状態遷移の一つなのでdebugレベルでログ出力
-		if (error._tag === 'NoActiveEditorError') {
-			logger.debug(`No active editor: ${error.message}`);
+		// NoActiveEditorError/NoActiveDocumentErrorは正常な状態遷移の一つなのでdebugレベルでログ出力
+		if (error._tag === 'NoActiveEditorError' || error._tag === 'NoActiveDocumentError') {
+			logger.debug(`No active editor/document: ${error.message}`);
 		} else {
 			logger.error(`Error: ${error.message}`, { errorType: error._tag, message: error.message });
 		}
