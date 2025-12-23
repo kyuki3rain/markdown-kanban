@@ -164,6 +164,8 @@ export class WebViewMessageHandler {
 			this.sendError(result.error);
 		} else {
 			logger.info('Document saved successfully');
+			// 保存成功後、isDirty: falseを明示的に送信
+			this.messageClient.sendDocumentStateChanged(false);
 		}
 	}
 
@@ -183,6 +185,10 @@ export class WebViewMessageHandler {
 			this.sendError(result.error);
 		} else {
 			logger.info('Document reverted successfully');
+			// 破棄成功後、isDirty: falseを明示的に送信
+			this.messageClient.sendDocumentStateChanged(false);
+			// 破棄後、タスク一覧を再取得して送信（UIを更新）
+			await this.handleGetTasks();
 		}
 	}
 
