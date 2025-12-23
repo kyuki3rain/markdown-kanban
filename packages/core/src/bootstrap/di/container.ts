@@ -90,8 +90,6 @@ export class Container {
 			createWorkspaceEdit: () => new vscode.WorkspaceEdit(),
 			createRange: (startLine, startCharacter, endLine, endCharacter) =>
 				new vscode.Range(startLine, startCharacter, endLine, endCharacter),
-			executeCommand: <T>(command: string, ...args: unknown[]) =>
-				vscode.commands.executeCommand<T>(command, ...args),
 			readFile: (uri) => vscode.workspace.fs.readFile(uri),
 		});
 

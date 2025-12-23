@@ -1,4 +1,5 @@
 import type { Result } from 'neverthrow';
+import { logger } from '../../shared';
 import type {
 	DocumentOperationError,
 	DocumentService,
@@ -15,6 +16,13 @@ export class RevertDocumentUseCase {
 	 * ドキュメントの変更を破棄する
 	 */
 	async execute(): Promise<Result<void, NoActiveDocumentError | DocumentOperationError>> {
-		return this.documentService.revertDocument();
+		logger.debug('RevertDocumentUseCase: execute start');
+		const result = await this.documentService.revertDocument();
+		if (result.isOk()) {
+			logger.debug('RevertDocumentUseCase: execute success');
+		} else {
+			logger.debug(`RevertDocumentUseCase: execute failed - ${result.error.message}`);
+		}
+		return result;
 	}
 }

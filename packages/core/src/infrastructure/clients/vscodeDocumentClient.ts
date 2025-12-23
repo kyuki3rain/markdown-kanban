@@ -50,7 +50,6 @@ export interface VscodeDocumentDeps {
 		endLine: number,
 		endCharacter: number,
 	): vscode.Range;
-	executeCommand<T>(command: string, ...args: unknown[]): Thenable<T | undefined>;
 	readFile(uri: vscode.Uri): Thenable<Uint8Array>;
 }
 

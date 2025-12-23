@@ -34,7 +34,6 @@ const createMockDeps = (overrides: Partial<VscodeDocumentDeps> = {}): VscodeDocu
 	applyEdit: vi.fn().mockResolvedValue(true),
 	createWorkspaceEdit: vi.fn().mockReturnValue({ replace: vi.fn() }),
 	createRange: vi.fn().mockImplementation(createMockRange),
-	executeCommand: vi.fn().mockResolvedValue(undefined),
 	readFile: vi.fn().mockResolvedValue(new TextEncoder().encode('')),
 	...overrides,
 });
@@ -282,6 +281,43 @@ describe('VscodeDocumentClient', () => {
 				expect(result.error).toBeInstanceOf(DocumentEditError);
 			}
 		});
+
+		it('アクティブなエディタがない場合はNoActiveEditorErrorを返す', async () => {
+			const deps = createMockDeps({
+				getActiveTextEditor: vi.fn().mockReturnValue(undefined),
+			});
+			const client = new VscodeDocumentClient(deps);
+
+			const result = await client.saveDocument();
+
+			expect(result.isErr()).toBe(true);
+			if (result.isErr()) {
+				expect(result.error).toBeInstanceOf(NoActiveEditorError);
+			}
+		});
+
+		it('ドキュメントを開けない場合はDocumentNotFoundErrorを返す', async () => {
+			const mockUri = createMockUri('/test/file.md');
+			const mockDocument = {
+				uri: mockUri,
+				getText: () => '# Test',
+			};
+			const mockEditor = { document: mockDocument };
+
+			const deps = createMockDeps({
+				getActiveTextEditor: vi.fn().mockReturnValue(mockEditor),
+				openTextDocument: vi.fn().mockRejectedValue(new Error('File not found')),
+			});
+			const client = new VscodeDocumentClient(deps);
+
+			const result = await client.saveDocument();
+
+			expect(result.isErr()).toBe(true);
+			if (result.isErr()) {
+				expect(result.error).toBeInstanceOf(DocumentNotFoundError);
+				expect(result.error.message).toContain('File not found');
+			}
+		});
 	});
 
 	describe('revertDocument', () => {
@@ -386,6 +422,69 @@ describe('VscodeDocumentClient', () => {
 			expect(result.isErr()).toBe(true);
 			if (result.isErr()) {
 				expect(result.error).toBeInstanceOf(DocumentEditError);
+			}
+		});
+
+		it('アクティブなエディタがない場合はNoActiveEditorErrorを返す', async () => {
+			const deps = createMockDeps({
+				getActiveTextEditor: vi.fn().mockReturnValue(undefined),
+			});
+			const client = new VscodeDocumentClient(deps);
+
+			const result = await client.revertDocument();
+
+			expect(result.isErr()).toBe(true);
+			if (result.isErr()) {
+				expect(result.error).toBeInstanceOf(NoActiveEditorError);
+			}
+		});
+
+		it('ドキュメントを開けない場合はDocumentEditErrorを返す', async () => {
+			const mockUri = createMockUri('/test/file.md');
+			const mockDocument = {
+				uri: mockUri,
+				getText: () => '# Test',
+			};
+			const mockEditor = { document: mockDocument };
+
+			const deps = createMockDeps({
+				getActiveTextEditor: vi.fn().mockReturnValue(mockEditor),
+				openTextDocument: vi.fn().mockRejectedValue(new Error('File not found')),
+			});
+			const client = new VscodeDocumentClient(deps);
+
+			const result = await client.revertDocument();
+
+			expect(result.isErr()).toBe(true);
+			if (result.isErr()) {
+				expect(result.error).toBeInstanceOf(DocumentEditError);
+				expect(result.error.message).toContain('File not found');
+			}
+		});
+
+		it('readFileに失敗した場合はDocumentEditErrorを返す', async () => {
+			const mockUri = createMockUri('/test/file.md');
+			const mockDocument = {
+				uri: mockUri,
+				getText: () => '# Test',
+				isDirty: true,
+				save: vi.fn().mockResolvedValue(true),
+			};
+			const mockEditor = { document: mockDocument };
+
+			const deps = createMockDeps({
+				getActiveTextEditor: vi.fn().mockReturnValue(mockEditor),
+				openTextDocument: vi.fn().mockResolvedValue(mockDocument),
+				readFile: vi.fn().mockRejectedValue(new Error('Cannot read file')),
+			});
+			const client = new VscodeDocumentClient(deps);
+
+			const result = await client.revertDocument();
+
+			expect(result.isErr()).toBe(true);
+			if (result.isErr()) {
+				expect(result.error).toBeInstanceOf(DocumentEditError);
+				expect(result.error.message).toContain('Cannot read file');
 			}
 		});
 	});
