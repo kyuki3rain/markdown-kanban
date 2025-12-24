@@ -1,5 +1,6 @@
 import type { Result } from 'neverthrow';
 import type { Task } from '../../domain/entities/task';
+import type { DocumentWriteError } from '../../domain/errors/documentWriteError';
 import type { NoActiveEditorError } from '../../domain/errors/noActiveEditorError';
 import type { TaskNotFoundError } from '../../domain/errors/taskNotFoundError';
 import type { TaskParseError } from '../../domain/errors/taskParseError';
@@ -22,7 +23,9 @@ export class ChangeTaskStatusUseCase {
 	async execute(
 		id: string,
 		newStatus: Status,
-	): Promise<Result<Task, TaskNotFoundError | TaskParseError | NoActiveEditorError>> {
+	): Promise<
+		Result<Task, TaskNotFoundError | TaskParseError | NoActiveEditorError | DocumentWriteError>
+	> {
 		// 設定を取得
 		const config = await this.configProvider.getConfig();
 

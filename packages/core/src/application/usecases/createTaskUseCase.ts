@@ -1,5 +1,6 @@
 import type { Result } from 'neverthrow';
 import { Task, type TaskMetadata } from '../../domain/entities/task';
+import type { DocumentWriteError } from '../../domain/errors/documentWriteError';
 import type { NoActiveEditorError } from '../../domain/errors/noActiveEditorError';
 import type { TaskNotFoundError } from '../../domain/errors/taskNotFoundError';
 import type { ConfigProvider } from '../../domain/ports/configProvider';
@@ -31,7 +32,7 @@ export class CreateTaskUseCase {
 	 */
 	async execute(
 		input: CreateTaskInput,
-	): Promise<Result<Task, TaskNotFoundError | NoActiveEditorError>> {
+	): Promise<Result<Task, TaskNotFoundError | NoActiveEditorError | DocumentWriteError>> {
 		const config = await this.configProvider.getConfig();
 
 		// ステータスが指定されていない場合はデフォルトステータスを使用
