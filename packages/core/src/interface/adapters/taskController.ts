@@ -9,6 +9,7 @@ import type {
 	UpdateTaskUseCase,
 } from '../../application/usecases';
 import type { Task, TaskMetadata } from '../../domain/entities/task';
+import type { DocumentOperationError } from '../../domain/errors/documentOperationError';
 import type { InvalidStatusError } from '../../domain/errors/invalidStatusError';
 import type { NoActiveEditorError } from '../../domain/errors/noActiveEditorError';
 import type { TaskNotFoundError } from '../../domain/errors/taskNotFoundError';
@@ -54,7 +55,9 @@ export class TaskController {
 	/**
 	 * 全タスクを取得する
 	 */
-	async getTasks(): Promise<Result<TaskDto[], TaskParseError | NoActiveEditorError>> {
+	async getTasks(): Promise<
+		Result<TaskDto[], TaskParseError | NoActiveEditorError | DocumentOperationError>
+	> {
 		const result = await this.getTasksUseCase.execute();
 		return result.map((tasks) => tasks.map(this.toDto));
 	}
@@ -64,7 +67,7 @@ export class TaskController {
 	 */
 	async createTask(
 		dto: CreateTaskDto,
-	): Promise<Result<TaskDto, TaskNotFoundError | InvalidStatusError | NoActiveEditorError>> {
+	): Promise<Result<TaskDto, InvalidStatusError | NoActiveEditorError | DocumentOperationError>> {
 		// ステータスの変換
 		let status: Status | undefined;
 		if (dto.status !== undefined) {
@@ -92,7 +95,14 @@ export class TaskController {
 	async updateTask(
 		dto: UpdateTaskDto,
 	): Promise<
-		Result<TaskDto, TaskNotFoundError | TaskParseError | InvalidStatusError | NoActiveEditorError>
+		Result<
+			TaskDto,
+			| TaskNotFoundError
+			| TaskParseError
+			| InvalidStatusError
+			| NoActiveEditorError
+			| DocumentOperationError
+		>
 	> {
 		const input: UpdateTaskInput = {
 			id: dto.id,
@@ -109,7 +119,9 @@ export class TaskController {
 	/**
 	 * タスクを削除する
 	 */
-	async deleteTask(id: string): Promise<Result<void, TaskNotFoundError | NoActiveEditorError>> {
+	async deleteTask(
+		id: string,
+	): Promise<Result<void, TaskNotFoundError | NoActiveEditorError | DocumentOperationError>> {
 		return this.deleteTaskUseCase.execute(id);
 	}
 
@@ -120,7 +132,14 @@ export class TaskController {
 		id: string,
 		newStatus: string,
 	): Promise<
-		Result<TaskDto, TaskNotFoundError | TaskParseError | InvalidStatusError | NoActiveEditorError>
+		Result<
+			TaskDto,
+			| TaskNotFoundError
+			| TaskParseError
+			| InvalidStatusError
+			| NoActiveEditorError
+			| DocumentOperationError
+		>
 	> {
 		const statusResult = Status.create(newStatus);
 		if (statusResult.isErr()) {

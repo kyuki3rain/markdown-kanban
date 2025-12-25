@@ -1,5 +1,6 @@
 import { err, ok, type Result } from 'neverthrow';
 import { Task } from '../../domain/entities/task';
+import { DocumentOperationError } from '../../domain/errors/documentOperationError';
 import { NoActiveEditorError } from '../../domain/errors/noActiveEditorError';
 import { TaskNotFoundError } from '../../domain/errors/taskNotFoundError';
 import { TaskParseError } from '../../domain/errors/taskParseError';
@@ -24,14 +25,16 @@ export class MarkdownTaskRepository implements TaskRepository {
 	/**
 	 * 全タスクを取得する
 	 */
-	async findAll(): Promise<Result<Task[], TaskParseError | NoActiveEditorError>> {
+	async findAll(): Promise<
+		Result<Task[], TaskParseError | NoActiveEditorError | DocumentOperationError>
+	> {
 		const textResult = await this.documentClient.getCurrentDocumentText();
 		if (textResult.isErr()) {
 			// NoActiveEditorErrorの場合はドメイン層のエラーに変換
 			if (textResult.error instanceof InfraNoActiveEditorError) {
 				return err(new NoActiveEditorError());
 			}
-			return err(new TaskParseError(0, textResult.error.message));
+			return err(new DocumentOperationError(textResult.error.message));
 		}
 
 		const parseResult = this.markdownClient.parse(textResult.value);
@@ -48,7 +51,9 @@ export class MarkdownTaskRepository implements TaskRepository {
 	 */
 	async findById(
 		id: string,
-	): Promise<Result<Task, TaskNotFoundError | TaskParseError | NoActiveEditorError>> {
+	): Promise<
+		Result<Task, TaskNotFoundError | TaskParseError | NoActiveEditorError | DocumentOperationError>
+	> {
 		const allResult = await this.findAll();
 		if (allResult.isErr()) {
 			return err(allResult.error);
@@ -65,7 +70,9 @@ export class MarkdownTaskRepository implements TaskRepository {
 	/**
 	 * パスでタスクをフィルタリングして取得する
 	 */
-	async findByPath(path: Path): Promise<Result<Task[], TaskParseError | NoActiveEditorError>> {
+	async findByPath(
+		path: Path,
+	): Promise<Result<Task[], TaskParseError | NoActiveEditorError | DocumentOperationError>> {
 		const allResult = await this.findAll();
 		if (allResult.isErr()) {
 			return err(allResult.error);
@@ -78,19 +85,19 @@ export class MarkdownTaskRepository implements TaskRepository {
 	/**
 	 * タスクを保存する（作成または更新）
 	 */
-	async save(task: Task): Promise<Result<Task, TaskNotFoundError | NoActiveEditorError>> {
+	async save(task: Task): Promise<Result<Task, NoActiveEditorError | DocumentOperationError>> {
 		const textResult = await this.documentClient.getCurrentDocumentText();
 		if (textResult.isErr()) {
 			if (textResult.error instanceof InfraNoActiveEditorError) {
 				return err(new NoActiveEditorError());
 			}
-			return err(new TaskNotFoundError(task.id));
+			return err(new DocumentOperationError(textResult.error.message));
 		}
 
 		const markdown = textResult.value;
 		const parseResult = this.markdownClient.parse(markdown);
 		if (parseResult.isErr()) {
-			return err(new TaskNotFoundError(task.id));
+			return err(new DocumentOperationError(parseResult.error.message));
 		}
 
 		const existingTask = parseResult.value.tasks.find((t) => t.id === task.id);
@@ -123,7 +130,7 @@ export class MarkdownTaskRepository implements TaskRepository {
 		}
 
 		if (editResult.isErr()) {
-			return err(new TaskNotFoundError(task.id));
+			return err(new DocumentOperationError(editResult.error.message));
 		}
 
 		const writeResult = await this.documentClient.replaceDocumentText(editResult.value);
@@ -131,7 +138,7 @@ export class MarkdownTaskRepository implements TaskRepository {
 			if (writeResult.error instanceof InfraNoActiveEditorError) {
 				return err(new NoActiveEditorError());
 			}
-			return err(new TaskNotFoundError(task.id));
+			return err(new DocumentOperationError(writeResult.error.message));
 		}
 
 		return ok(task);
@@ -140,19 +147,21 @@ export class MarkdownTaskRepository implements TaskRepository {
 	/**
 	 * タスクを削除する
 	 */
-	async delete(id: string): Promise<Result<void, TaskNotFoundError | NoActiveEditorError>> {
+	async delete(
+		id: string,
+	): Promise<Result<void, TaskNotFoundError | NoActiveEditorError | DocumentOperationError>> {
 		const textResult = await this.documentClient.getCurrentDocumentText();
 		if (textResult.isErr()) {
 			if (textResult.error instanceof InfraNoActiveEditorError) {
 				return err(new NoActiveEditorError());
 			}
-			return err(new TaskNotFoundError(id));
+			return err(new DocumentOperationError(textResult.error.message));
 		}
 
 		const markdown = textResult.value;
 		const parseResult = this.markdownClient.parse(markdown);
 		if (parseResult.isErr()) {
-			return err(new TaskNotFoundError(id));
+			return err(new DocumentOperationError(parseResult.error.message));
 		}
 
 		const existingTask = parseResult.value.tasks.find((t) => t.id === id);
@@ -166,7 +175,7 @@ export class MarkdownTaskRepository implements TaskRepository {
 		});
 
 		if (editResult.isErr()) {
-			return err(new TaskNotFoundError(id));
+			return err(new DocumentOperationError(editResult.error.message));
 		}
 
 		const writeResult = await this.documentClient.replaceDocumentText(editResult.value);
@@ -174,7 +183,7 @@ export class MarkdownTaskRepository implements TaskRepository {
 			if (writeResult.error instanceof InfraNoActiveEditorError) {
 				return err(new NoActiveEditorError());
 			}
-			return err(new TaskNotFoundError(id));
+			return err(new DocumentOperationError(writeResult.error.message));
 		}
 
 		return ok(undefined);
@@ -183,13 +192,15 @@ export class MarkdownTaskRepository implements TaskRepository {
 	/**
 	 * 利用可能なパス（見出し階層）を全て取得する
 	 */
-	async getAvailablePaths(): Promise<Result<Path[], TaskParseError | NoActiveEditorError>> {
+	async getAvailablePaths(): Promise<
+		Result<Path[], TaskParseError | NoActiveEditorError | DocumentOperationError>
+	> {
 		const textResult = await this.documentClient.getCurrentDocumentText();
 		if (textResult.isErr()) {
 			if (textResult.error instanceof InfraNoActiveEditorError) {
 				return err(new NoActiveEditorError());
 			}
-			return err(new TaskParseError(0, textResult.error.message));
+			return err(new DocumentOperationError(textResult.error.message));
 		}
 
 		const parseResult = this.markdownClient.parse(textResult.value);
