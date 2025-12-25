@@ -128,11 +128,9 @@ describe('MarkdownTaskRepository', () => {
 		it('ドキュメントがない場合はエラーを返す', async () => {
 			const markdownClient = createMockMarkdownTaskClient();
 			const documentClient = createMockVscodeDocumentClient({
-				getCurrentDocumentText: vi.fn().mockResolvedValue({
-					isErr: () => true,
-					isOk: () => false,
-					error: { message: 'No document' },
-				}),
+				getCurrentDocumentText: vi
+					.fn()
+					.mockResolvedValue(err(new DocumentNotFoundError('No document'))),
 			});
 			const configProvider = createMockConfigProvider();
 
@@ -822,11 +820,9 @@ describe('MarkdownTaskRepository', () => {
 		it('ドキュメントがない場合はエラーを返す', async () => {
 			const markdownClient = createMockMarkdownTaskClient();
 			const documentClient = createMockVscodeDocumentClient({
-				getCurrentDocumentText: vi.fn().mockResolvedValue({
-					isErr: () => true,
-					isOk: () => false,
-					error: { message: 'No document' },
-				}),
+				getCurrentDocumentText: vi
+					.fn()
+					.mockResolvedValue(err(new DocumentNotFoundError('No document'))),
 			});
 			const configProvider = createMockConfigProvider();
 
