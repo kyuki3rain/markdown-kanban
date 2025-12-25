@@ -1,6 +1,6 @@
 import { err, ok, type Result } from 'neverthrow';
 import { Task } from '../../domain/entities/task';
-import { DocumentWriteError } from '../../domain/errors/documentWriteError';
+import { DocumentOperationError } from '../../domain/errors/documentOperationError';
 import { NoActiveEditorError } from '../../domain/errors/noActiveEditorError';
 import { TaskNotFoundError } from '../../domain/errors/taskNotFoundError';
 import { TaskParseError } from '../../domain/errors/taskParseError';
@@ -9,11 +9,7 @@ import type { TaskRepository } from '../../domain/ports/taskRepository';
 import type { Path } from '../../domain/valueObjects/path';
 import type { MarkdownTaskClient, ParsedTask } from '../clients/markdownTaskClient';
 import type { VscodeDocumentClient } from '../clients/vscodeDocumentClient';
-import {
-	DocumentEditError as InfraDocumentEditError,
-	DocumentNotFoundError as InfraDocumentNotFoundError,
-	NoActiveEditorError as InfraNoActiveEditorError,
-} from '../clients/vscodeDocumentClient';
+import { NoActiveEditorError as InfraNoActiveEditorError } from '../clients/vscodeDocumentClient';
 
 /**
  * MarkdownTaskRepository
@@ -83,21 +79,19 @@ export class MarkdownTaskRepository implements TaskRepository {
 	/**
 	 * タスクを保存する（作成または更新）
 	 */
-	async save(
-		task: Task,
-	): Promise<Result<Task, TaskNotFoundError | NoActiveEditorError | DocumentWriteError>> {
+	async save(task: Task): Promise<Result<Task, NoActiveEditorError | DocumentOperationError>> {
 		const textResult = await this.documentClient.getCurrentDocumentText();
 		if (textResult.isErr()) {
 			if (textResult.error instanceof InfraNoActiveEditorError) {
 				return err(new NoActiveEditorError());
 			}
-			return err(new DocumentWriteError(textResult.error.message));
+			return err(new DocumentOperationError(textResult.error.message));
 		}
 
 		const markdown = textResult.value;
 		const parseResult = this.markdownClient.parse(markdown);
 		if (parseResult.isErr()) {
-			return err(new DocumentWriteError(parseResult.error.message));
+			return err(new DocumentOperationError(parseResult.error.message));
 		}
 
 		const existingTask = parseResult.value.tasks.find((t) => t.id === task.id);
@@ -130,7 +124,7 @@ export class MarkdownTaskRepository implements TaskRepository {
 		}
 
 		if (editResult.isErr()) {
-			return err(new TaskNotFoundError(task.id));
+			return err(new DocumentOperationError(editResult.error.message));
 		}
 
 		const writeResult = await this.documentClient.replaceDocumentText(editResult.value);
@@ -138,13 +132,7 @@ export class MarkdownTaskRepository implements TaskRepository {
 			if (writeResult.error instanceof InfraNoActiveEditorError) {
 				return err(new NoActiveEditorError());
 			}
-			if (
-				writeResult.error instanceof InfraDocumentEditError ||
-				writeResult.error instanceof InfraDocumentNotFoundError
-			) {
-				return err(new DocumentWriteError(writeResult.error.message));
-			}
-			return err(new DocumentWriteError('ドキュメントの書き込みに失敗しました'));
+			return err(new DocumentOperationError(writeResult.error.message));
 		}
 
 		return ok(task);
@@ -155,19 +143,19 @@ export class MarkdownTaskRepository implements TaskRepository {
 	 */
 	async delete(
 		id: string,
-	): Promise<Result<void, TaskNotFoundError | NoActiveEditorError | DocumentWriteError>> {
+	): Promise<Result<void, TaskNotFoundError | NoActiveEditorError | DocumentOperationError>> {
 		const textResult = await this.documentClient.getCurrentDocumentText();
 		if (textResult.isErr()) {
 			if (textResult.error instanceof InfraNoActiveEditorError) {
 				return err(new NoActiveEditorError());
 			}
-			return err(new DocumentWriteError(textResult.error.message));
+			return err(new DocumentOperationError(textResult.error.message));
 		}
 
 		const markdown = textResult.value;
 		const parseResult = this.markdownClient.parse(markdown);
 		if (parseResult.isErr()) {
-			return err(new DocumentWriteError(parseResult.error.message));
+			return err(new DocumentOperationError(parseResult.error.message));
 		}
 
 		const existingTask = parseResult.value.tasks.find((t) => t.id === id);
@@ -181,7 +169,7 @@ export class MarkdownTaskRepository implements TaskRepository {
 		});
 
 		if (editResult.isErr()) {
-			return err(new TaskNotFoundError(id));
+			return err(new DocumentOperationError(editResult.error.message));
 		}
 
 		const writeResult = await this.documentClient.replaceDocumentText(editResult.value);
@@ -189,13 +177,7 @@ export class MarkdownTaskRepository implements TaskRepository {
 			if (writeResult.error instanceof InfraNoActiveEditorError) {
 				return err(new NoActiveEditorError());
 			}
-			if (
-				writeResult.error instanceof InfraDocumentEditError ||
-				writeResult.error instanceof InfraDocumentNotFoundError
-			) {
-				return err(new DocumentWriteError(writeResult.error.message));
-			}
-			return err(new DocumentWriteError('ドキュメントの書き込みに失敗しました'));
+			return err(new DocumentOperationError(writeResult.error.message));
 		}
 
 		return ok(undefined);

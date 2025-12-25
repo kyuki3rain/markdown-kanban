@@ -1,6 +1,6 @@
 import { err, type Result } from 'neverthrow';
 import type { Task, TaskMetadata } from '../../domain/entities/task';
-import type { DocumentWriteError } from '../../domain/errors/documentWriteError';
+import type { DocumentOperationError } from '../../domain/errors/documentOperationError';
 import type { InvalidStatusError } from '../../domain/errors/invalidStatusError';
 import type { NoActiveEditorError } from '../../domain/errors/noActiveEditorError';
 import type { TaskNotFoundError } from '../../domain/errors/taskNotFoundError';
@@ -42,7 +42,7 @@ export class UpdateTaskUseCase {
 			| TaskParseError
 			| NoActiveEditorError
 			| InvalidStatusError
-			| DocumentWriteError
+			| DocumentOperationError
 		>
 	> {
 		// タスクを取得

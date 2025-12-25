@@ -9,7 +9,7 @@ import type {
 	UpdateTaskUseCase,
 } from '../../application/usecases';
 import type { Task, TaskMetadata } from '../../domain/entities/task';
-import type { DocumentWriteError } from '../../domain/errors/documentWriteError';
+import type { DocumentOperationError } from '../../domain/errors/documentOperationError';
 import type { InvalidStatusError } from '../../domain/errors/invalidStatusError';
 import type { NoActiveEditorError } from '../../domain/errors/noActiveEditorError';
 import type { TaskNotFoundError } from '../../domain/errors/taskNotFoundError';
@@ -65,12 +65,7 @@ export class TaskController {
 	 */
 	async createTask(
 		dto: CreateTaskDto,
-	): Promise<
-		Result<
-			TaskDto,
-			TaskNotFoundError | InvalidStatusError | NoActiveEditorError | DocumentWriteError
-		>
-	> {
+	): Promise<Result<TaskDto, InvalidStatusError | NoActiveEditorError | DocumentOperationError>> {
 		// ステータスの変換
 		let status: Status | undefined;
 		if (dto.status !== undefined) {
@@ -104,7 +99,7 @@ export class TaskController {
 			| TaskParseError
 			| InvalidStatusError
 			| NoActiveEditorError
-			| DocumentWriteError
+			| DocumentOperationError
 		>
 	> {
 		const input: UpdateTaskInput = {
@@ -124,7 +119,7 @@ export class TaskController {
 	 */
 	async deleteTask(
 		id: string,
-	): Promise<Result<void, TaskNotFoundError | NoActiveEditorError | DocumentWriteError>> {
+	): Promise<Result<void, TaskNotFoundError | NoActiveEditorError | DocumentOperationError>> {
 		return this.deleteTaskUseCase.execute(id);
 	}
 
@@ -141,7 +136,7 @@ export class TaskController {
 			| TaskParseError
 			| InvalidStatusError
 			| NoActiveEditorError
-			| DocumentWriteError
+			| DocumentOperationError
 		>
 	> {
 		const statusResult = Status.create(newStatus);

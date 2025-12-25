@@ -1,6 +1,6 @@
 import type { Result } from 'neverthrow';
 import type { Task } from '../entities/task';
-import type { DocumentWriteError } from '../errors/documentWriteError';
+import type { DocumentOperationError } from '../errors/documentOperationError';
 import type { NoActiveEditorError } from '../errors/noActiveEditorError';
 import type { TaskNotFoundError } from '../errors/taskNotFoundError';
 import type { TaskParseError } from '../errors/taskParseError';
@@ -31,16 +31,14 @@ export interface TaskRepository {
 	/**
 	 * タスクを保存する（作成または更新）
 	 */
-	save(
-		task: Task,
-	): Promise<Result<Task, TaskNotFoundError | NoActiveEditorError | DocumentWriteError>>;
+	save(task: Task): Promise<Result<Task, NoActiveEditorError | DocumentOperationError>>;
 
 	/**
 	 * タスクを削除する
 	 */
 	delete(
 		id: string,
-	): Promise<Result<void, TaskNotFoundError | NoActiveEditorError | DocumentWriteError>>;
+	): Promise<Result<void, TaskNotFoundError | NoActiveEditorError | DocumentOperationError>>;
 
 	/**
 	 * 利用可能なパス（見出し階層）を全て取得する

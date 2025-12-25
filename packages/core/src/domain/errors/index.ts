@@ -1,5 +1,5 @@
 // Domain Errors
-export { DocumentWriteError } from './documentWriteError';
+export { DocumentOperationError } from './documentOperationError';
 export { InvalidStatusError } from './invalidStatusError';
 export { NoActiveEditorError } from './noActiveEditorError';
 export { TaskNotFoundError } from './taskNotFoundError';
