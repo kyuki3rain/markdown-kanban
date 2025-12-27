@@ -66,15 +66,6 @@ describe('TaskId', () => {
 		});
 	});
 
-	describe('fromString', () => {
-		it('既存のID文字列からTaskIdを復元できる', () => {
-			const originalId = 'abc123def456';
-			const taskId = TaskId.fromString(originalId);
-
-			expect(taskId.toString()).toBe(originalId);
-		});
-	});
-
 	describe('equals', () => {
 		it('同じIDを持つTaskIdはequal', () => {
 			const path = Path.create(['Project']);

@@ -22,13 +22,6 @@ export class TaskId {
 		return new TaskId(hash.substring(0, 12));
 	}
 
-	/**
-	 * 既存のID文字列からTaskIdを復元
-	 */
-	static fromString(id: string): TaskId {
-		return new TaskId(id);
-	}
-
 	toString(): string {
 		return this.value;
 	}
