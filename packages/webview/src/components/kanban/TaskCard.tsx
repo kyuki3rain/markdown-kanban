@@ -26,6 +26,7 @@ export function TaskCard({ task, onClick }: TaskCardProps) {
 		<button
 			ref={setNodeRef}
 			type="button"
+			aria-hidden={isDragging}
 			className={cn(
 				'group relative w-full text-left bg-card border border-border rounded-lg p-3 shadow-sm',
 				'cursor-pointer select-none',
