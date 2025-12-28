@@ -269,19 +269,6 @@ describe('WebViewMessageHandler', () => {
 					'DocumentOperationError',
 				);
 			});
-
-			it('アクティブなドキュメントがない場合、エラーメッセージを送信する', async () => {
-				const error = new NoActiveDocumentError('アクティブなドキュメントがありません');
-				vi.mocked(mockDocumentController.saveDocument).mockResolvedValue(err(error));
-				const message: WebViewToExtensionMessage = { type: 'SAVE_DOCUMENT' };
-
-				await handlerWithDocumentController.handleMessage(message);
-
-				expect(mockMessageClient.sendError).toHaveBeenCalledWith(
-					'アクティブなドキュメントがありません',
-					'NoActiveDocumentError',
-				);
-			});
 		});
 
 		describe('REVERT_DOCUMENT', () => {
@@ -321,7 +308,7 @@ describe('WebViewMessageHandler', () => {
 		});
 
 		describe('sendError', () => {
-			it('NoActiveEditorErrorの場合、debugレベルでログ出力しエラーを送信する', async () => {
+			it('NoActiveEditorErrorの場合、エラーを送信する', async () => {
 				const error = new NoActiveEditorError('Markdownファイルを開いてください');
 				mockTaskController.getTasks = vi.fn().mockResolvedValue(err(error));
 				const message: WebViewToExtensionMessage = { type: 'GET_TASKS' };
@@ -334,7 +321,7 @@ describe('WebViewMessageHandler', () => {
 				);
 			});
 
-			it('NoActiveDocumentErrorの場合、debugレベルでログ出力しエラーを送信する', async () => {
+			it('NoActiveDocumentErrorの場合、エラーを送信する', async () => {
 				const error = new NoActiveDocumentError('アクティブなドキュメントがありません');
 				vi.mocked(mockDocumentController.saveDocument).mockResolvedValue(err(error));
 				const message: WebViewToExtensionMessage = { type: 'SAVE_DOCUMENT' };
@@ -349,7 +336,7 @@ describe('WebViewMessageHandler', () => {
 		});
 
 		describe('unknown message type', () => {
-			it('不明なメッセージタイプの場合、エラーログを出力する', async () => {
+			it('不明なメッセージタイプの場合、例外を発生させずに処理を完了する', async () => {
 				const message = { type: 'UNKNOWN_TYPE' } as unknown as WebViewToExtensionMessage;
 
 				// エラーにならずに処理が完了することを確認

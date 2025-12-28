@@ -7,10 +7,6 @@ let registeredCommands: Map<string, () => void> = new Map();
 const mockShowOrCreate = vi.fn();
 const mockDispose = vi.fn();
 
-// モックのコンテナ
-const mockContainer = {};
-const mockDisposeContainer = vi.fn();
-
 // bootstrapモジュールをモック（クラスコンストラクタとして正しく動作するように）
 vi.mock('./bootstrap', () => {
 	// クラスとして動作するモック
@@ -31,7 +27,7 @@ vi.mock('./bootstrap', () => {
 // vscodeモジュールをモック
 vi.mock('vscode', () => ({
 	commands: {
-		registerCommand: vi.fn((command: string, callback: () => void) => {
+		registerCommand: vi.fn((_command: string, _callback: () => void) => {
 			return { dispose: vi.fn() };
 		}),
 	},
@@ -81,10 +77,7 @@ describe('extension', () => {
 
 			extension.activate(mockContext as never);
 
-			expect(KanbanPanelProvider).toHaveBeenCalledWith(
-				mockContext.extensionUri,
-				expect.anything(),
-			);
+			expect(KanbanPanelProvider).toHaveBeenCalledWith(mockContext.extensionUri, expect.anything());
 		});
 
 		it('markdownKanban.openBoardコマンドを登録する', async () => {

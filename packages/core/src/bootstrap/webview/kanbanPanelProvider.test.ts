@@ -58,6 +58,11 @@ describe('KanbanPanelProvider', () => {
 	beforeEach(() => {
 		vi.clearAllMocks();
 
+		// コールバック変数をリセット
+		activeEditorChangeCallback = null;
+		documentChangeCallback = null;
+		documentSaveCallback = null;
+
 		mockExtensionUri = { path: '/mock/extension/path' };
 
 		mockContainer = {
@@ -171,7 +176,7 @@ describe('KanbanPanelProvider', () => {
 				mockContainer.getVscodeDocumentClient = vi.fn(() => ({
 					setCurrentDocumentUri: mockSetCurrentDocumentUri,
 					getCurrentDocumentUri: vi.fn().mockReturnValue(undefined),
-				}));
+				})) as unknown as typeof mockContainer.getVscodeDocumentClient;
 
 				provider.showOrCreate();
 
@@ -192,7 +197,7 @@ describe('KanbanPanelProvider', () => {
 				mockContainer.getVscodeDocumentClient = vi.fn(() => ({
 					setCurrentDocumentUri: mockSetCurrentDocumentUri,
 					getCurrentDocumentUri: vi.fn().mockReturnValue(undefined),
-				}));
+				})) as unknown as typeof mockContainer.getVscodeDocumentClient;
 
 				provider.showOrCreate();
 
@@ -213,7 +218,7 @@ describe('KanbanPanelProvider', () => {
 				mockContainer.getVscodeDocumentClient = vi.fn(() => ({
 					setCurrentDocumentUri: mockSetCurrentDocumentUri,
 					getCurrentDocumentUri: vi.fn().mockReturnValue(undefined),
-				}));
+				})) as unknown as typeof mockContainer.getVscodeDocumentClient;
 
 				provider.showOrCreate();
 
@@ -229,10 +234,10 @@ describe('KanbanPanelProvider', () => {
 				mockContainer.getVscodeDocumentClient = vi.fn(() => ({
 					setCurrentDocumentUri: vi.fn(),
 					getCurrentDocumentUri: vi.fn().mockReturnValue(mockUri),
-				}));
+				})) as unknown as typeof mockContainer.getVscodeDocumentClient;
 				mockContainer.getTaskController = vi.fn(() => ({
 					getTasks: vi.fn().mockResolvedValue({ isOk: () => true, value: [] }),
-				}));
+				})) as unknown as typeof mockContainer.getTaskController;
 
 				provider.showOrCreate();
 				vi.clearAllMocks();
@@ -262,7 +267,7 @@ describe('KanbanPanelProvider', () => {
 				mockContainer.getVscodeDocumentClient = vi.fn(() => ({
 					setCurrentDocumentUri: vi.fn(),
 					getCurrentDocumentUri: vi.fn().mockReturnValue(mockUri),
-				}));
+				})) as unknown as typeof mockContainer.getVscodeDocumentClient;
 
 				provider.showOrCreate();
 				vi.clearAllMocks();
@@ -287,7 +292,7 @@ describe('KanbanPanelProvider', () => {
 				mockContainer.getVscodeDocumentClient = vi.fn(() => ({
 					setCurrentDocumentUri: vi.fn(),
 					getCurrentDocumentUri: vi.fn().mockReturnValue(mockUri),
-				}));
+				})) as unknown as typeof mockContainer.getVscodeDocumentClient;
 
 				provider.showOrCreate();
 				vi.clearAllMocks();
@@ -298,7 +303,7 @@ describe('KanbanPanelProvider', () => {
 					languageId: 'markdown',
 					isDirty: false,
 				};
-				documentSaveCallback?.(mockDocument);
+				await documentSaveCallback?.(mockDocument);
 
 				expect(mockWebview.postMessage).toHaveBeenCalledWith({
 					type: 'DOCUMENT_STATE_CHANGED',
@@ -312,7 +317,7 @@ describe('KanbanPanelProvider', () => {
 				mockContainer.getVscodeDocumentClient = vi.fn(() => ({
 					setCurrentDocumentUri: vi.fn(),
 					getCurrentDocumentUri: vi.fn().mockReturnValue(mockCurrentUri),
-				}));
+				})) as unknown as typeof mockContainer.getVscodeDocumentClient;
 
 				provider.showOrCreate();
 				vi.clearAllMocks();
@@ -323,7 +328,7 @@ describe('KanbanPanelProvider', () => {
 					languageId: 'markdown',
 					isDirty: false,
 				};
-				documentSaveCallback?.(mockDocument);
+				await documentSaveCallback?.(mockDocument);
 
 				expect(mockWebview.postMessage).not.toHaveBeenCalled();
 			});
@@ -335,7 +340,7 @@ describe('KanbanPanelProvider', () => {
 			const mockTasks = [{ id: 'task-1', title: 'Test Task' }];
 			mockContainer.getTaskController = vi.fn(() => ({
 				getTasks: vi.fn().mockResolvedValue({ isOk: () => true, value: mockTasks }),
-			}));
+			})) as unknown as typeof mockContainer.getTaskController;
 
 			provider.showOrCreate();
 
@@ -358,7 +363,7 @@ describe('KanbanPanelProvider', () => {
 		it('タスク取得失敗時、何も送信しない', async () => {
 			mockContainer.getTaskController = vi.fn(() => ({
 				getTasks: vi.fn().mockResolvedValue({ isOk: () => false, error: new Error('Failed') }),
-			}));
+			})) as unknown as typeof mockContainer.getTaskController;
 
 			provider.showOrCreate();
 			vi.clearAllMocks();
@@ -418,7 +423,7 @@ describe('KanbanPanelProvider', () => {
 		});
 	});
 
-	describe('isMarkdownDocument', () => {
+	describe('Markdown判定による処理分岐', () => {
 		it('languageIdがmarkdownの場合、タスク更新を送信する', async () => {
 			provider.showOrCreate();
 
@@ -479,7 +484,7 @@ describe('KanbanPanelProvider', () => {
 			mockContainer.getVscodeDocumentClient = vi.fn(() => ({
 				setCurrentDocumentUri: mockSetCurrentDocumentUri,
 				getCurrentDocumentUri: vi.fn().mockReturnValue(undefined),
-			}));
+			})) as unknown as typeof mockContainer.getVscodeDocumentClient;
 
 			// アクティブエディタがMarkdownファイル
 			const vscode = await import('vscode');
