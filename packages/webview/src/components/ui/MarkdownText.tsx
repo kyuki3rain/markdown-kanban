@@ -1,11 +1,15 @@
+import { useCallback, useMemo } from 'react';
 import Markdown from 'react-markdown';
 import remarkGfm from 'remark-gfm';
 import type { Components } from 'react-markdown';
-import type { MouseEvent } from 'react';
+import type { MouseEvent, KeyboardEvent } from 'react';
 
 interface MarkdownTextProps {
 	children: string;
 }
+
+/** 許可する要素のみレンダリング（セキュリティ強化） */
+const ALLOWED_ELEMENTS = ['p', 'strong', 'em', 'code', 'del', 'a'] as const;
 
 /**
  * インラインMarkdownをレンダリングするコンポーネント
@@ -18,45 +22,52 @@ interface MarkdownTextProps {
  * - [link](url)
  */
 export function MarkdownText({ children }: MarkdownTextProps) {
-	const handleLinkClick = (e: MouseEvent) => {
+	const handleLinkClick = useCallback((e: MouseEvent) => {
 		e.stopPropagation();
-	};
+	}, []);
 
-	const components: Components = {
-		// <p>をインライン表示用の<span>に変換
-		p: ({ children }) => <span>{children}</span>,
-		// 太字
-		strong: ({ children }) => <strong className="font-bold">{children}</strong>,
-		// 斜体
-		em: ({ children }) => <em className="italic">{children}</em>,
-		// インラインコード
-		code: ({ children }) => (
-			<code className="px-1 py-0.5 rounded bg-muted text-sm font-mono">{children}</code>
-		),
-		// 打ち消し線
-		del: ({ children }) => <del className="line-through">{children}</del>,
-		// リンク
-		a: ({ href, children }) => (
-			<a
-				href={href}
-				onClick={handleLinkClick}
-				className="text-primary underline hover:text-primary/80"
-				target="_blank"
-				rel="noopener noreferrer"
-			>
-				{children}
-			</a>
-		),
-	};
+	const handleLinkKeyDown = useCallback((e: KeyboardEvent) => {
+		if (e.key === 'Enter' || e.key === ' ') {
+			e.stopPropagation();
+		}
+	}, []);
 
-	// 許可する要素のみレンダリング（セキュリティ強化）
-	const allowedElements = ['p', 'strong', 'em', 'code', 'del', 'a'];
+	const components: Components = useMemo(
+		() => ({
+			// <p>をインライン表示用の<span>に変換
+			p: ({ children }) => <span>{children}</span>,
+			// 太字
+			strong: ({ children }) => <strong className="font-bold">{children}</strong>,
+			// 斜体
+			em: ({ children }) => <em className="italic">{children}</em>,
+			// インラインコード
+			code: ({ children }) => (
+				<code className="px-1 py-0.5 rounded bg-muted text-sm font-mono">{children}</code>
+			),
+			// 打ち消し線
+			del: ({ children }) => <del className="line-through">{children}</del>,
+			// リンク
+			a: ({ href, children }) => (
+				<a
+					href={href}
+					onClick={handleLinkClick}
+					onKeyDown={handleLinkKeyDown}
+					className="text-primary underline hover:text-primary/80"
+					target="_blank"
+					rel="noopener noreferrer"
+				>
+					{children}
+				</a>
+			),
+		}),
+		[handleLinkClick, handleLinkKeyDown],
+	);
 
 	return (
 		<Markdown
 			remarkPlugins={[remarkGfm]}
 			components={components}
-			allowedElements={allowedElements}
+			allowedElements={[...ALLOWED_ELEMENTS]}
 			unwrapDisallowed
 		>
 			{children}

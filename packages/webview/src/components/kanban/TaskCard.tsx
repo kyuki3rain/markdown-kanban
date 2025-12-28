@@ -1,3 +1,4 @@
+import type { KeyboardEvent } from 'react';
 import { useDraggable } from '@dnd-kit/core';
 import { GripVertical } from 'lucide-react';
 import { cn } from '../../lib/utils';
@@ -23,10 +24,18 @@ export function TaskCard({ task, onClick }: TaskCardProps) {
 		onClick?.(task);
 	};
 
+	const handleKeyDown = (e: KeyboardEvent) => {
+		if (e.key === 'Enter' || e.key === ' ') {
+			e.preventDefault();
+			onClick?.(task);
+		}
+	};
+
 	return (
-		<button
+		<div
 			ref={setNodeRef}
-			type="button"
+			role="button"
+			tabIndex={0}
 			aria-hidden={isDragging}
 			className={cn(
 				'group relative w-full text-left bg-card border border-border rounded-lg p-3 shadow-sm',
@@ -36,6 +45,7 @@ export function TaskCard({ task, onClick }: TaskCardProps) {
 					: 'hover:shadow-md hover:border-primary/50 transition-all duration-200',
 			)}
 			onClick={handleClick}
+			onKeyDown={handleKeyDown}
 		>
 			{/* ドラッグハンドル */}
 			<span
@@ -74,7 +84,7 @@ export function TaskCard({ task, onClick }: TaskCardProps) {
 					</span>
 				)}
 			</span>
-		</button>
+		</div>
 	);
 }
 
