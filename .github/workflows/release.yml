@@ -51,6 +51,7 @@ jobs:
             ./markdown-kanban-${{ steps.version.outputs.version }}.vsix
 
       - name: Publish to VS Code Marketplace
+        if: ${{ secrets.VSCE_PAT != '' }}
         run: pnpm vsce publish --no-dependencies
         env:
           VSCE_PAT: ${{ secrets.VSCE_PAT }}
