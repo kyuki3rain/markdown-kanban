@@ -1,71 +1,138 @@
-# markdown-kanban README
+# Markdown Kanban
 
-This is the README for your extension "markdown-kanban". After writing up a brief description, we recommend including the following sections.
+MarkdownファイルのTODOリスト（チェックボックス）をカンバンボード形式で表示・操作できるVSCode拡張機能です。
 
-## Features
+![Kanban Board](docs/images/kanban-board.png)
 
-Describe specific features of your extension including screenshots of your extension in action. Image paths are relative to this README file.
+## 特徴
 
-For example if there is an image subfolder under your extension project workspace:
+- **Markdown標準記法を尊重**: 素のMarkdownとしても可読性を維持
+- **見出し階層をパスとして解釈**: タスクのグルーピングに使用
+- **双方向同期**: エディタとボードがリアルタイムで同期
+- **ドラッグ&ドロップ**: カード移動でステータスを変更
+- **VSCode標準のUndo/Redo対応**: 安心して編集可能
 
-\!\[feature X\]\(images/feature-x.png\)
+## インストール
 
-> Tip: Many popular extensions utilize animations. This is an excellent way to show off your extension! We recommend short, focused animations that are easy to follow.
+### マーケットプレイスから
 
-## Requirements
+VSCode拡張機能マーケットプレイスで「Markdown Kanban」を検索してインストール。
 
-If you have any requirements or dependencies, add a section describing those and how to install and configure them.
+### VSIXファイルから
 
-## Extension Settings
+1. [Releases](https://github.com/kyuki3rain/markdown-kanban/releases)からVSIXファイルをダウンロード
+2. VSCodeで `Ctrl+Shift+P` → `Extensions: Install from VSIX...`
+3. ダウンロードしたVSIXファイルを選択
 
-Include if your extension adds any VS Code settings through the `contributes.configuration` extension point.
+## 使い方
 
-For example:
+1. Markdownファイルを開く
+2. エディタ右上のカンバンアイコンをクリック、または `Ctrl+Shift+P` → `Open Kanban Board`
+3. カンバンボードが表示される
 
-This extension contributes the following settings:
+### タスクの作成
 
-* `myExtension.enable`: Enable/disable this extension.
-* `myExtension.thing`: Set to `blah` to do something.
+各カラム下部の「+」ボタンからタスクを作成できます。
 
-## Known Issues
+### タスクの編集
 
-Calling out known issues can help limit users opening duplicate issues against your extension.
+タスクカードをクリックすると編集モーダルが開きます。
 
-## Release Notes
+### ステータスの変更
 
-Users appreciate release notes as you update your extension.
+タスクカードをドラッグ&ドロップで別のカラムに移動すると、ステータスが変更されます。
 
-### 1.0.0
+## Markdownの書式
 
-Initial release of ...
+### 基本的なタスク
 
-### 1.0.1
+```markdown
+- [ ] 未完了タスク
+- [x] 完了タスク
+```
 
-Fixed issue #.
+### 見出しによるグルーピング
 
-### 1.1.0
+見出しの階層構造がタスクの「パス」になります。
 
-Added features X, Y, and Z.
+```markdown
+# 仕事
+## プロジェクトA
+- [ ] APIの実装        <!-- パス: 仕事 / プロジェクトA -->
 
+## プロジェクトB
+- [ ] 要件定義         <!-- パス: 仕事 / プロジェクトB -->
+
+# 個人
+- [ ] 部屋の掃除       <!-- パス: 個人 -->
+```
+
+### メタデータ（子要素）
+
+タスクの子要素として `key: value` 形式でメタデータを記述できます。
+
+```markdown
+- [ ] APIの実装
+  - status: in-progress
+  - priority: high
+  - due: 2025-01-15
+```
+
+## 設定
+
+### 設定の優先順位
+
+1. フロントマター（ファイル固有）
+2. VSCode設定（ワークスペース or ユーザー）
+3. ビルトインデフォルト
+
+### フロントマター
+
+ファイルの先頭にYAML形式で設定を記述できます。
+
+```yaml
 ---
+kanban:
+  statuses:
+    - todo
+    - in-progress
+    - done
+  doneStatuses:
+    - done
+  defaultStatus: todo
+  defaultDoneStatus: done
+---
+```
 
-## Following extension guidelines
+### VSCode設定
 
-Ensure that you've read through the extensions guidelines and follow the best practices for creating your extension.
+| 設定項目 | 説明 | デフォルト |
+|---------|------|-----------|
+| `markdownKanban.statuses` | ステータス一覧（カラムの表示順） | `["todo", "in-progress", "done"]` |
+| `markdownKanban.doneStatuses` | 完了扱いとするステータス | `["done"]` |
+| `markdownKanban.defaultStatus` | デフォルトステータス（`[ ]` の時） | `"todo"` |
+| `markdownKanban.defaultDoneStatus` | デフォルト完了ステータス（`[x]` の時） | `"done"` |
+| `markdownKanban.sortBy` | タスクのソート順 | `"markdown"` |
+| `markdownKanban.syncCheckboxWithDone` | 完了ステータス変更時にチェックボックスも連動 | `true` |
 
-* [Extension Guidelines](https://code.visualstudio.com/api/references/extension-guidelines)
+#### ソート順オプション
 
-## Working with Markdown
+- `markdown`: ファイル内の出現順
+- `priority`: 優先度順
+- `due`: 期限順
+- `alphabetical`: アルファベット順
 
-You can author your README using Visual Studio Code. Here are some useful editor keyboard shortcuts:
+### 設定例
 
-* Split the editor (`Cmd+\` on macOS or `Ctrl+\` on Windows and Linux).
-* Toggle preview (`Shift+Cmd+V` on macOS or `Shift+Ctrl+V` on Windows and Linux).
-* Press `Ctrl+Space` (Windows, Linux, macOS) to see a list of Markdown snippets.
+```jsonc
+// .vscode/settings.json
+{
+  "markdownKanban.statuses": ["backlog", "todo", "in-progress", "review", "done"],
+  "markdownKanban.doneStatuses": ["done"],
+  "markdownKanban.sortBy": "priority"
+}
+```
 
-## For more information
+## ライセンス
 
-* [Visual Studio Code's Markdown Support](http://code.visualstudio.com/docs/languages/markdown)
-* [Markdown Syntax Reference](https://help.github.com/articles/markdown-basics/)
-
-**Enjoy!**
+MIT License - 詳細は [LICENSE](LICENSE) を参照してください。
