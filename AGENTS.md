@@ -306,6 +306,18 @@ pnpm run test:coverage
 - HTMLレポート: `packages/core/coverage/index.html` をブラウザで開く
 - 閾値: statements 80%, branches 70%, functions 85%, lines 80%
 
+### Issue/PR本文記述
+
+Issue や PR の本文でコード例を示す際、コードブロックが二重になることでMarkdownの整形が崩れる場合がある。これを防ぐため、外側のコードブロックには **4つのバッククォート** を使用する。
+
+````markdown
+````typescript
+const example = "inner code block uses 3 backticks";
+````
+````
+
+この規約により、内側の3つのバッククォートと外側が干渉せず、正しく表示される。
+
 ---
 
 ## 注意事項
