@@ -2,6 +2,7 @@ import { useDraggable } from '@dnd-kit/core';
 import { GripVertical } from 'lucide-react';
 import { cn } from '../../lib/utils';
 import type { TaskDto } from '../../types';
+import { MarkdownText } from '../ui/MarkdownText';
 import { PathBadge } from './PathBadge';
 
 interface TaskCardProps {
@@ -63,7 +64,7 @@ export function TaskCard({ task, onClick }: TaskCardProps) {
 						task.isChecked && 'line-through text-muted-foreground',
 					)}
 				>
-					{task.title}
+					<MarkdownText>{task.title}</MarkdownText>
 				</span>
 
 				{/* パスバッジ */}
@@ -89,7 +90,9 @@ export function TaskCardOverlay({ task }: { task: TaskDto }) {
 			)}
 		>
 			<div className="pl-4">
-				<p className="text-sm font-medium text-foreground break-words">{task.title}</p>
+				<p className="text-sm font-medium text-foreground break-words">
+					<MarkdownText>{task.title}</MarkdownText>
+				</p>
 				{task.path.length > 0 && (
 					<div className="mt-2">
 						<PathBadge path={task.path} />
