@@ -1,11 +1,17 @@
 import { err, ok } from 'neverthrow';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
+import {
+	DocumentOperationError,
+	NoActiveDocumentError,
+} from '../../application/ports/documentService';
+import { NoActiveEditorError } from '../../domain/errors/noActiveEditorError';
 import { TaskNotFoundError } from '../../domain/errors/taskNotFoundError';
 import { TaskParseError } from '../../domain/errors/taskParseError';
 import type { KanbanConfig } from '../../domain/ports/configProvider';
 import type { WebViewMessageClient } from '../clients/webViewMessageClient';
 import type { TaskDto, WebViewToExtensionMessage } from '../types/messages';
 import type { ConfigController } from './configController';
+import type { DocumentController } from './documentController';
 import type { TaskController } from './taskController';
 import { WebViewMessageHandler } from './webViewMessageHandler';
 
@@ -13,7 +19,9 @@ describe('WebViewMessageHandler', () => {
 	let mockTaskController: TaskController;
 	let mockConfigController: ConfigController;
 	let mockMessageClient: WebViewMessageClient;
+	let mockDocumentController: DocumentController;
 	let handler: WebViewMessageHandler;
+	let handlerWithDocumentController: WebViewMessageHandler;
 
 	const mockTaskDto: TaskDto = {
 		id: 'task-1',
@@ -52,12 +60,27 @@ describe('WebViewMessageHandler', () => {
 			sendTasksUpdated: vi.fn(),
 			sendConfigUpdated: vi.fn(),
 			sendError: vi.fn(),
+			sendDocumentStateChanged: vi.fn(),
 		} as unknown as WebViewMessageClient;
 
+		mockDocumentController = {
+			saveDocument: vi.fn().mockResolvedValue(ok(undefined)),
+			revertDocument: vi.fn().mockResolvedValue(ok(undefined)),
+		} as unknown as DocumentController;
+
+		// documentControllerなしのハンドラー
 		handler = new WebViewMessageHandler(
 			mockTaskController,
 			mockConfigController,
 			mockMessageClient,
+		);
+
+		// documentController付きのハンドラー
+		handlerWithDocumentController = new WebViewMessageHandler(
+			mockTaskController,
+			mockConfigController,
+			mockMessageClient,
+			mockDocumentController,
 		);
 	});
 
@@ -211,6 +234,118 @@ describe('WebViewMessageHandler', () => {
 
 				expect(mockConfigController.getConfig).toHaveBeenCalled();
 				expect(mockMessageClient.sendConfigUpdated).toHaveBeenCalledWith(mockConfig);
+			});
+		});
+
+		describe('SAVE_DOCUMENT', () => {
+			it('documentControllerがない場合、エラーメッセージを送信する', async () => {
+				const message: WebViewToExtensionMessage = { type: 'SAVE_DOCUMENT' };
+
+				await handler.handleMessage(message);
+
+				expect(mockMessageClient.sendError).toHaveBeenCalledWith(
+					'ドキュメントコントローラーが利用できません',
+				);
+			});
+
+			it('保存に成功した場合、isDirty: falseを送信する', async () => {
+				const message: WebViewToExtensionMessage = { type: 'SAVE_DOCUMENT' };
+
+				await handlerWithDocumentController.handleMessage(message);
+
+				expect(mockDocumentController.saveDocument).toHaveBeenCalled();
+				expect(mockMessageClient.sendDocumentStateChanged).toHaveBeenCalledWith(false);
+			});
+
+			it('保存に失敗した場合、エラーメッセージを送信する', async () => {
+				const error = new DocumentOperationError('保存に失敗しました');
+				vi.mocked(mockDocumentController.saveDocument).mockResolvedValue(err(error));
+				const message: WebViewToExtensionMessage = { type: 'SAVE_DOCUMENT' };
+
+				await handlerWithDocumentController.handleMessage(message);
+
+				expect(mockMessageClient.sendError).toHaveBeenCalledWith(
+					'保存に失敗しました',
+					'DocumentOperationError',
+				);
+			});
+		});
+
+		describe('REVERT_DOCUMENT', () => {
+			it('documentControllerがない場合、エラーメッセージを送信する', async () => {
+				const message: WebViewToExtensionMessage = { type: 'REVERT_DOCUMENT' };
+
+				await handler.handleMessage(message);
+
+				expect(mockMessageClient.sendError).toHaveBeenCalledWith(
+					'ドキュメントコントローラーが利用できません',
+				);
+			});
+
+			it('破棄に成功した場合、isDirty: falseを送信しタスク一覧を再取得する', async () => {
+				const message: WebViewToExtensionMessage = { type: 'REVERT_DOCUMENT' };
+
+				await handlerWithDocumentController.handleMessage(message);
+
+				expect(mockDocumentController.revertDocument).toHaveBeenCalled();
+				expect(mockMessageClient.sendDocumentStateChanged).toHaveBeenCalledWith(false);
+				expect(mockTaskController.getTasks).toHaveBeenCalled();
+				expect(mockMessageClient.sendTasksUpdated).toHaveBeenCalledWith([mockTaskDto]);
+			});
+
+			it('破棄に失敗した場合、エラーメッセージを送信する', async () => {
+				const error = new DocumentOperationError('破棄に失敗しました');
+				vi.mocked(mockDocumentController.revertDocument).mockResolvedValue(err(error));
+				const message: WebViewToExtensionMessage = { type: 'REVERT_DOCUMENT' };
+
+				await handlerWithDocumentController.handleMessage(message);
+
+				expect(mockMessageClient.sendError).toHaveBeenCalledWith(
+					'破棄に失敗しました',
+					'DocumentOperationError',
+				);
+			});
+		});
+
+		describe('sendError', () => {
+			it('NoActiveEditorErrorの場合、エラーを送信する', async () => {
+				const error = new NoActiveEditorError('Markdownファイルを開いてください');
+				mockTaskController.getTasks = vi.fn().mockResolvedValue(err(error));
+				const message: WebViewToExtensionMessage = { type: 'GET_TASKS' };
+
+				await handler.handleMessage(message);
+
+				expect(mockMessageClient.sendError).toHaveBeenCalledWith(
+					'Markdownファイルを開いてください',
+					'NoActiveEditorError',
+				);
+			});
+
+			it('NoActiveDocumentErrorの場合、エラーを送信する', async () => {
+				const error = new NoActiveDocumentError('アクティブなドキュメントがありません');
+				vi.mocked(mockDocumentController.saveDocument).mockResolvedValue(err(error));
+				const message: WebViewToExtensionMessage = { type: 'SAVE_DOCUMENT' };
+
+				await handlerWithDocumentController.handleMessage(message);
+
+				expect(mockMessageClient.sendError).toHaveBeenCalledWith(
+					'アクティブなドキュメントがありません',
+					'NoActiveDocumentError',
+				);
+			});
+		});
+
+		describe('unknown message type', () => {
+			it('不明なメッセージタイプの場合、エラーログを出力して処理を完了する', async () => {
+				const { logger } = await import('../../shared/logger');
+				const loggerSpy = vi.spyOn(logger, 'error');
+
+				const message = { type: 'UNKNOWN_TYPE' } as unknown as WebViewToExtensionMessage;
+
+				await expect(handler.handleMessage(message)).resolves.not.toThrow();
+				expect(loggerSpy).toHaveBeenCalledWith(expect.stringContaining('Unknown message type'));
+
+				loggerSpy.mockRestore();
 			});
 		});
 	});
