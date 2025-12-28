@@ -20,14 +20,14 @@ const DEFAULT_PRIORITY_ORDER = 999;
  * タスクを指定されたソートモードでソートする
  * @param tasks ソート対象のタスク配列
  * @param sortBy ソートモード
- * @returns ソート済みのタスク配列（元の配列は変更されない）
+ * @returns ソート済みのタスク配列（常に新しい配列を返す）
  */
 export function sortTasks(tasks: Task[], sortBy: KanbanConfig['sortBy']): Task[] {
-	if (sortBy === 'markdown') {
-		return tasks;
-	}
-
 	const sorted = [...tasks];
+
+	if (sortBy === 'markdown') {
+		return sorted;
+	}
 
 	switch (sortBy) {
 		case 'alphabetical':

@@ -66,7 +66,11 @@ describe('GetTasksUseCase', () => {
 			const result = await useCase.execute();
 
 			expect(result.isOk()).toBe(true);
-			expect(result._unsafeUnwrap()).toHaveLength(3);
+			const resultTasks = result._unsafeUnwrap();
+			expect(resultTasks).toHaveLength(3);
+			expect(resultTasks[0].id).toBe('1');
+			expect(resultTasks[1].id).toBe('2');
+			expect(resultTasks[2].id).toBe('3');
 		});
 
 		it('タスクが存在しない場合は空配列を返す', async () => {
@@ -111,7 +115,10 @@ describe('GetTasksUseCase', () => {
 			const result = await useCase.executeByPath(path);
 
 			expect(result.isOk()).toBe(true);
-			expect(result._unsafeUnwrap()).toHaveLength(2);
+			const resultTasks = result._unsafeUnwrap();
+			expect(resultTasks).toHaveLength(2);
+			expect(resultTasks[0].id).toBe('1');
+			expect(resultTasks[1].id).toBe('2');
 			expect(repository.findByPath).toHaveBeenCalledWith(path);
 		});
 
