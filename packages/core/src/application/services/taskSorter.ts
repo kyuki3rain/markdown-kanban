@@ -25,11 +25,10 @@ const DEFAULT_PRIORITY_ORDER = 999;
 export function sortTasks(tasks: Task[], sortBy: KanbanConfig['sortBy']): Task[] {
 	const sorted = [...tasks];
 
-	if (sortBy === 'markdown') {
-		return sorted;
-	}
-
 	switch (sortBy) {
+		case 'markdown':
+			return sorted;
+
 		case 'alphabetical':
 			return sorted.sort((a, b) => a.title.localeCompare(b.title));
 
@@ -51,6 +50,6 @@ export function sortTasks(tasks: Task[], sortBy: KanbanConfig['sortBy']): Task[]
 			});
 
 		default:
-			return tasks;
+			return sorted;
 	}
 }
