@@ -311,9 +311,9 @@ pnpm run test:coverage
 Issue や PR の本文でコード例を示す際、コードブロックが二重になることでMarkdownの整形が崩れる場合がある。これを防ぐため、外側のコードブロックには **4つのバッククォート** を使用する。
 
 ````markdown
-````typescript
+```typescript
 const example = "inner code block uses 3 backticks";
-````
+```
 ````
 
 この規約により、内側の3つのバッククォートと外側が干渉せず、正しく表示される。
