@@ -1,0 +1,1 @@
+export { sortTasks } from './taskSorter';

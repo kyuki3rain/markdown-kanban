@@ -129,7 +129,10 @@ export class Container {
 	 */
 	private initializeUseCases(): void {
 		// GetTasksUseCase
-		this.getTasksUseCase = new GetTasksUseCase(this.markdownTaskRepository);
+		this.getTasksUseCase = new GetTasksUseCase(
+			this.markdownTaskRepository,
+			this.frontmatterConfigProvider,
+		);
 
 		// CreateTaskUseCase
 		this.createTaskUseCase = new CreateTaskUseCase(
