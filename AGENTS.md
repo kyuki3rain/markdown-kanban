@@ -22,8 +22,8 @@
 | ドキュメント | 説明 | パス |
 |-------------|------|------|
 | 技術原則 | 不変の技術原則・アーキテクチャ・コーディング規約 | [docs/CONSTITUTION.md](./docs/CONSTITUTION.md) |
-| 要件定義書 | 機能要件・UI仕様・設定項目 | [docs/REQUIREMENTS.md](./docs/REQUIREMENTS.md) |
-| MVP実装計画 | v0.1.0達成のための実装計画・フェーズ定義 | [docs/MVP_PLAN.md](./docs/MVP_PLAN.md) |
+| 開発計画 | 今後のロードマップ | [docs/PLAN.md](./docs/PLAN.md) |
+| 要件定義 | バージョンごとの機能要件 | [docs/requirements/](./docs/requirements/) |
 
 ---
 
@@ -204,7 +204,7 @@ md-tasks/
 
 ### 新機能の実装
 
-1. まず [docs/MVP_PLAN.md](./docs/MVP_PLAN.md) で該当フェーズを確認
+1. [docs/PLAN.md](./docs/PLAN.md) と [docs/requirements/](./docs/requirements/) で要件を確認
 2. Domain層から実装開始（TDDで）
 3. Application層 → Infrastructure層 → Interface層 の順で実装
 4. WebView側の変更が必要な場合は最後に実装
@@ -217,7 +217,7 @@ md-tasks/
 
 ### 設定の追加
 
-1. [docs/REQUIREMENTS.md](./docs/REQUIREMENTS.md) の設定セクションを確認
+1. [docs/requirements/](./docs/requirements/) の設定セクションを確認
 2. `package.json` のconfiguration項目を更新
 3. ConfigProviderポートを更新
 
