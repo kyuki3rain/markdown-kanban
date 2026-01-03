@@ -67,17 +67,6 @@ suite('Configuration Tests', () => {
 		const updatedStatuses = vscode.workspace.getConfiguration('mdTasks').get<string[]>('statuses');
 		assert.deepStrictEqual(updatedStatuses, customStatuses, 'Custom statuses should be applied');
 
-		// 設定を元に戻す
-		await vscode.workspace
-			.getConfiguration('mdTasks')
-			.update('statuses', undefined, vscode.ConfigurationTarget.Global);
-
-		// デフォルトに戻っていることを確認
-		const restoredStatuses = vscode.workspace.getConfiguration('mdTasks').get<string[]>('statuses');
-		assert.deepStrictEqual(
-			restoredStatuses,
-			['todo', 'in-progress', 'done'],
-			'Statuses should be restored to default',
-		);
+		// 設定のリセットはteardownで自動的に行われる
 	});
 });

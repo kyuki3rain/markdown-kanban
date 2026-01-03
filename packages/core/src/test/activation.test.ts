@@ -52,13 +52,11 @@ suite('Extension Activation', () => {
 	});
 
 	test('アクティベート後に必要なコマンドが登録されている', async () => {
-		// Extensionがアクティベートされていることを前提とする
+		// このテスト内でExtensionをアクティベートする（テストの独立性を保証）
 		const extension = vscode.extensions.getExtension(EXTENSION_ID);
 		assert.ok(extension, `Extension ${EXTENSION_ID} should be found`);
 
-		if (!extension.isActive) {
-			await extension.activate();
-		}
+		await extension.activate();
 
 		// 登録されているコマンド一覧を取得
 		const commands = await vscode.commands.getCommands(true);
