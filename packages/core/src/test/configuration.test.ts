@@ -22,6 +22,11 @@ suite('Configuration Tests', () => {
 	teardown(async () => {
 		const config = vscode.workspace.getConfiguration('mdTasks');
 		await config.update('statuses', undefined, vscode.ConfigurationTarget.Global);
+		await config.update('doneStatuses', undefined, vscode.ConfigurationTarget.Global);
+		await config.update('defaultStatus', undefined, vscode.ConfigurationTarget.Global);
+		await config.update('defaultDoneStatus', undefined, vscode.ConfigurationTarget.Global);
+		await config.update('sortBy', undefined, vscode.ConfigurationTarget.Global);
+		await config.update('syncCheckboxWithDone', undefined, vscode.ConfigurationTarget.Global);
 	});
 
 	test('デフォルト設定値が正しく読み込まれる', () => {
@@ -56,17 +61,61 @@ suite('Configuration Tests', () => {
 		assert.strictEqual(syncCheckboxWithDone, true, 'Default syncCheckboxWithDone should be true');
 	});
 
-	test('カスタム設定が反映される', async () => {
-		// カスタム設定を適用
+	test('statusesのカスタム設定が反映される', async () => {
 		const customStatuses = ['backlog', 'doing', 'review', 'done'];
 		await vscode.workspace
 			.getConfiguration('mdTasks')
 			.update('statuses', customStatuses, vscode.ConfigurationTarget.Global);
 
-		// 設定が反映されていることを確認（getConfigurationを再取得）
 		const updatedStatuses = vscode.workspace.getConfiguration('mdTasks').get<string[]>('statuses');
 		assert.deepStrictEqual(updatedStatuses, customStatuses, 'Custom statuses should be applied');
+	});
 
-		// 設定のリセットはteardownで自動的に行われる
+	test('doneStatusesのカスタム設定が反映される', async () => {
+		const customDoneStatuses = ['done', 'completed', 'closed'];
+		await vscode.workspace
+			.getConfiguration('mdTasks')
+			.update('doneStatuses', customDoneStatuses, vscode.ConfigurationTarget.Global);
+
+		const updated = vscode.workspace.getConfiguration('mdTasks').get<string[]>('doneStatuses');
+		assert.deepStrictEqual(updated, customDoneStatuses, 'Custom doneStatuses should be applied');
+	});
+
+	test('defaultStatusのカスタム設定が反映される', async () => {
+		await vscode.workspace
+			.getConfiguration('mdTasks')
+			.update('defaultStatus', 'backlog', vscode.ConfigurationTarget.Global);
+
+		const updated = vscode.workspace.getConfiguration('mdTasks').get<string>('defaultStatus');
+		assert.strictEqual(updated, 'backlog', 'Custom defaultStatus should be applied');
+	});
+
+	test('defaultDoneStatusのカスタム設定が反映される', async () => {
+		await vscode.workspace
+			.getConfiguration('mdTasks')
+			.update('defaultDoneStatus', 'completed', vscode.ConfigurationTarget.Global);
+
+		const updated = vscode.workspace.getConfiguration('mdTasks').get<string>('defaultDoneStatus');
+		assert.strictEqual(updated, 'completed', 'Custom defaultDoneStatus should be applied');
+	});
+
+	test('sortByのカスタム設定が反映される', async () => {
+		await vscode.workspace
+			.getConfiguration('mdTasks')
+			.update('sortBy', 'status', vscode.ConfigurationTarget.Global);
+
+		const updated = vscode.workspace.getConfiguration('mdTasks').get<string>('sortBy');
+		assert.strictEqual(updated, 'status', 'Custom sortBy should be applied');
+	});
+
+	test('syncCheckboxWithDoneのカスタム設定が反映される', async () => {
+		await vscode.workspace
+			.getConfiguration('mdTasks')
+			.update('syncCheckboxWithDone', false, vscode.ConfigurationTarget.Global);
+
+		const updated = vscode.workspace
+			.getConfiguration('mdTasks')
+			.get<boolean>('syncCheckboxWithDone');
+		assert.strictEqual(updated, false, 'Custom syncCheckboxWithDone should be applied');
 	});
 });
