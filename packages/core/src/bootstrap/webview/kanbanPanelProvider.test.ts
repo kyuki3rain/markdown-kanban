@@ -21,6 +21,7 @@ const mockPanel = {
 	reveal: vi.fn(),
 	onDidDispose: vi.fn(),
 	dispose: vi.fn(),
+	visible: true,
 };
 
 vi.mock('vscode', () => ({
@@ -138,6 +139,30 @@ describe('KanbanPanelProvider', () => {
 			// disposeの後、showOrCreateは新しいパネルを作成する
 			provider.showOrCreate();
 			expect(vscode.window.createWebviewPanel).toHaveBeenCalledTimes(2);
+		});
+	});
+
+	describe('isVisible', () => {
+		it('パネルが作成されていない場合はfalseを返す', () => {
+			expect(provider.isVisible()).toBe(false);
+		});
+
+		it('パネルが作成されvisibleがtrueの場合はtrueを返す', () => {
+			mockPanel.visible = true;
+			provider.showOrCreate();
+			expect(provider.isVisible()).toBe(true);
+		});
+
+		it('パネルが作成されvisibleがfalseの場合はfalseを返す', () => {
+			mockPanel.visible = false;
+			provider.showOrCreate();
+			expect(provider.isVisible()).toBe(false);
+		});
+
+		it('パネルが破棄された後はfalseを返す', () => {
+			provider.showOrCreate();
+			provider.dispose();
+			expect(provider.isVisible()).toBe(false);
 		});
 	});
 

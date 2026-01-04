@@ -60,7 +60,7 @@ suite('E2E: Basic Flow Tests', () => {
 			assert.strictEqual(api.isPanelVisible(), true, 'Panel should be visible');
 		});
 
-		test('1.2.3 Reopening panel reveals existing one', async () => {
+		test('1.2.2 Reopening panel reveals existing one', async () => {
 			// Markdownファイルを開く
 			await createAndShowTestDocument(BASIC_TASKS_MARKDOWN);
 

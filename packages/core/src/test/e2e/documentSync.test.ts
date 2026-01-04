@@ -140,8 +140,8 @@ suite('E2E: Document Sync Tests', () => {
 		});
 	});
 
-	suite('3.4 isDirty State Tracking', () => {
-		test('3.4.1 isDirty becomes true after edit', async () => {
+	suite('3.3 isDirty State Tracking', () => {
+		test('3.3.1 isDirty becomes true after edit', async () => {
 			// Markdownファイルを開く
 			const { document, editor } = await createAndShowTestDocument(BASIC_TASKS_MARKDOWN);
 
