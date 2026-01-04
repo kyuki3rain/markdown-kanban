@@ -234,6 +234,13 @@ export class KanbanPanelProvider {
 	}
 
 	/**
+	 * パネルが表示されているかどうかを返す
+	 */
+	public isVisible(): boolean {
+		return this.panel?.visible ?? false;
+	}
+
+	/**
 	 * リソースを破棄
 	 */
 	public dispose(): void {

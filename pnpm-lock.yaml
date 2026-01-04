@@ -8,6 +8,12 @@ importers:
 
   .:
     devDependencies:
+      '@vscode/test-cli':
+        specifier: ^0.0.12
+        version: 0.0.12
+      '@vscode/test-electron':
+        specifier: ^2.5.2
+        version: 2.5.2
       '@vscode/vsce':
         specifier: ^3.5.0
         version: 3.7.1

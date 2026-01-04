@@ -122,9 +122,11 @@
     "test": "pnpm --filter @md-tasks/core run test",
     "test:watch": "pnpm --filter @md-tasks/core run test:watch",
     "test:coverage": "pnpm --filter @md-tasks/core run test:coverage",
-    "test:e2e": "pnpm run pretest:e2e && vscode-test"
+    "test:e2e": "pnpm run pretest:e2e && pnpm --filter @md-tasks/core exec vscode-test"
   },
   "devDependencies": {
+    "@vscode/test-cli": "^0.0.12",
+    "@vscode/test-electron": "^2.5.2",
     "@vscode/vsce": "^3.5.0",
     "npm-run-all": "^4.1.5"
   }

@@ -1,6 +1,28 @@
 import * as vscode from 'vscode';
 import { disposeContainer, getContainer, KanbanPanelProvider } from './bootstrap';
+import type { KanbanConfig } from './domain/ports/configProvider';
+import type { TaskDto } from './interface/types/messages';
 import { logger } from './shared';
+
+/**
+ * E2Eテスト用に公開するAPI
+ */
+export interface ExtensionApi {
+	/**
+	 * パネルが表示されているかどうかを返す
+	 */
+	isPanelVisible(): boolean;
+
+	/**
+	 * 設定を取得する
+	 */
+	getConfig(): Promise<KanbanConfig>;
+
+	/**
+	 * タスク一覧を取得する
+	 */
+	getTasks(): Promise<TaskDto[]>;
+}
 
 // パネルプロバイダーのインスタンス
 let kanbanPanelProvider: KanbanPanelProvider | undefined;
@@ -8,7 +30,7 @@ let kanbanPanelProvider: KanbanPanelProvider | undefined;
 /**
  * 拡張機能がアクティブになった時に呼ばれる
  */
-export function activate(context: vscode.ExtensionContext): void {
+export function activate(context: vscode.ExtensionContext): ExtensionApi {
 	logger.info('MD Tasks extension is activating...');
 
 	// DIコンテナを初期化
@@ -32,6 +54,16 @@ export function activate(context: vscode.ExtensionContext): void {
 	context.subscriptions.push(editorTitleCommand);
 
 	logger.info('MD Tasks extension activated successfully');
+
+	// E2Eテスト用のAPIを返す
+	return {
+		isPanelVisible: () => kanbanPanelProvider?.isVisible() ?? false,
+		getConfig: () => container.getConfigController().getConfig(),
+		getTasks: async () => {
+			const result = await container.getTaskController().getTasks();
+			return result.isOk() ? result.value : [];
+		},
+	};
 }
 
 /**

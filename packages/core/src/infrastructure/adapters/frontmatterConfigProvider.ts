@@ -22,7 +22,7 @@ export class FrontmatterConfigProvider implements ConfigProvider {
 	 * 設定を取得する
 	 */
 	async getConfig(): Promise<KanbanConfig> {
-		const frontmatterConfig = this.getFrontmatterConfig();
+		const frontmatterConfig = await this.getFrontmatterConfigAsync();
 		const fallbackConfig = await this.getFallbackConfig();
 
 		return {
@@ -52,8 +52,8 @@ export class FrontmatterConfigProvider implements ConfigProvider {
 		return config[key];
 	}
 
-	private getFrontmatterConfig(): FrontmatterConfig | undefined {
-		const textResult = this.documentClient.getActiveDocumentText();
+	private async getFrontmatterConfigAsync(): Promise<FrontmatterConfig | undefined> {
+		const textResult = await this.documentClient.getCurrentDocumentText();
 		if (textResult.isErr()) {
 			return undefined;
 		}
