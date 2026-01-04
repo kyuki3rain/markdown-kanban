@@ -92,7 +92,7 @@ suite('Document Sync Tests', () => {
 		);
 	});
 
-	test('変更時にisDirtyがtrueになる', async () => {
+	test('エディタでタスクのテキストを編集するとドキュメントに反映される', async () => {
 		const doc = await vscode.workspace.openTextDocument({
 			language: 'markdown',
 			content: '# Test\n- [ ] Task 1\n',
@@ -102,12 +102,16 @@ suite('Document Sync Tests', () => {
 		const editor = vscode.window.activeTextEditor;
 		assert.ok(editor, 'Editor should be active');
 
-		// 変更を加える
+		// 既存のタスクのテキストを変更する
 		await editor.edit((editBuilder) => {
-			editBuilder.insert(new vscode.Position(2, 0), '- [ ] New Task\n');
+			const line = doc.lineAt(1);
+			const text = line.text;
+			const newText = text.replace('Task 1', 'Updated Task');
+			editBuilder.replace(line.range, newText);
 		});
 
-		// 変更後はisDirtyがtrueになる
+		// 変更後はisDirtyがtrueになり、変更内容が反映されている
 		assert.ok(doc.isDirty, 'Document should be dirty after modification');
+		assert.ok(doc.getText().includes('Updated Task'), 'Document should contain updated task');
 	});
 });

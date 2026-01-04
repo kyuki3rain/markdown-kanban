@@ -32,6 +32,20 @@ export class KanbanPanelProvider {
 	}
 
 	/**
+	 * パネルが表示されているかどうかを返す
+	 */
+	public isVisible(): boolean {
+		return this.panel?.visible ?? false;
+	}
+
+	/**
+	 * パネルのタイトルを取得する
+	 */
+	public getPanelTitle(): string | undefined {
+		return this.panel?.title;
+	}
+
+	/**
 	 * パネルを表示または作成する
 	 */
 	public showOrCreate(viewColumn?: vscode.ViewColumn): void {
