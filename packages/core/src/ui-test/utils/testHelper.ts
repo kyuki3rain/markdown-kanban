@@ -327,14 +327,30 @@ export function getWebView(): WebView {
  */
 export async function switchToWebViewFrame(driver: WebDriver, timeout = 10000): Promise<void> {
 	// WebViewパネルのiframeを探す
-	// VSCodeのWebViewは "webview ready" クラスを持つiframeとして表示される
-	const iframeLocator = By.css('iframe.webview.ready');
+	// VSCodeのバージョンによってクラス名の形式が異なる可能性があるため、複数のセレクターを試す
+	const selectors = [
+		"iframe[class='webview ready']", // VSCode 1.37+
+		'iframe.webview.ready', // 複数クラスとして解釈される場合
+		"iframe[class*='webview']", // webviewを含むクラス
+	];
 
-	await driver.wait(until.elementLocated(iframeLocator), timeout);
-	const iframes = await driver.findElements(iframeLocator);
+	let iframes: WebElement[] = [];
+
+	for (const selector of selectors) {
+		try {
+			const locator = By.css(selector);
+			await driver.wait(until.elementLocated(locator), Math.floor(timeout / selectors.length));
+			iframes = await driver.findElements(locator);
+			if (iframes.length > 0) {
+				break;
+			}
+		} catch {
+			// 次のセレクターを試す
+		}
+	}
 
 	if (iframes.length === 0) {
-		throw new Error('No WebView iframe found');
+		throw new Error('No WebView iframe found with any selector');
 	}
 
 	// 最後に追加されたiframe（最新のWebViewパネル）を選択
