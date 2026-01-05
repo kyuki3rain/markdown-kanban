@@ -18,6 +18,7 @@
     "@types/mdast": "^4.0.4",
     "@types/mocha": "^10.0.10",
     "@types/node": "22.x",
+    "@types/selenium-webdriver": "^4.35.4",
     "@types/vscode": "^1.107.0",
     "@vitest/coverage-v8": "^4.0.16",
     "@vscode/test-cli": "^0.0.12",

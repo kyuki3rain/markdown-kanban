@@ -31,6 +31,7 @@ export function Column({ status, tasks, isDone, onTaskClick, onAddTask }: Column
 				'flex flex-col min-w-[280px] max-w-[320px] h-full',
 				'bg-muted/30 rounded-lg border border-border',
 			)}
+			data-testid={`column-${status}`}
 		>
 			{/* カラムヘッダー */}
 			<div className="flex items-center justify-between px-4 py-3 border-b border-border">
@@ -40,10 +41,14 @@ export function Column({ status, tasks, isDone, onTaskClick, onAddTask }: Column
 							'text-sm font-semibold uppercase tracking-wide',
 							isDone ? 'text-green-600 dark:text-green-400' : 'text-foreground',
 						)}
+						data-testid={`column-title-${status}`}
 					>
 						{status}
 					</h2>
-					<span className="text-xs text-muted-foreground bg-muted px-2 py-0.5 rounded-full">
+					<span
+						className="text-xs text-muted-foreground bg-muted px-2 py-0.5 rounded-full"
+						data-testid={`column-count-${status}`}
+					>
 						{tasks.length}
 					</span>
 				</div>
@@ -57,6 +62,7 @@ export function Column({ status, tasks, isDone, onTaskClick, onAddTask }: Column
 					'transition-colors duration-200',
 					isOver && 'bg-primary/10 ring-2 ring-primary ring-inset',
 				)}
+				data-testid={`task-list-${status}`}
 			>
 				{tasks.map((task) => (
 					<TaskCard key={task.id} task={task} onClick={onTaskClick} />
@@ -87,6 +93,7 @@ export function Column({ status, tasks, isDone, onTaskClick, onAddTask }: Column
 						'hover:bg-muted hover:text-foreground',
 						'transition-colors duration-200',
 					)}
+					data-testid={`add-task-${status}`}
 				>
 					<Plus className="h-4 w-4" />
 					Add task

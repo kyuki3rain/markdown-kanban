@@ -17,7 +17,7 @@ export function FloatingActions({ isDirty, onSave, onRevert }: FloatingActionsPr
 	}
 
 	return (
-		<div className="fixed bottom-6 right-6 flex gap-2 z-50">
+		<div className="fixed bottom-6 right-6 flex gap-2 z-50" data-testid="floating-actions">
 			<button
 				type="button"
 				onClick={onRevert}
@@ -28,6 +28,7 @@ export function FloatingActions({ isDirty, onSave, onRevert }: FloatingActionsPr
 					'text-sm font-medium',
 				)}
 				title="変更を破棄"
+				data-testid="button-discard"
 			>
 				<RotateCcw className="h-4 w-4" />
 				Discard
@@ -42,6 +43,7 @@ export function FloatingActions({ isDirty, onSave, onRevert }: FloatingActionsPr
 					'text-sm font-medium',
 				)}
 				title="変更を保存"
+				data-testid="button-save"
 			>
 				<Save className="h-4 w-4" />
 				Save

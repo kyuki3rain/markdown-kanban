@@ -115,23 +115,29 @@ export function TaskModal({
 				role="dialog"
 				aria-modal="true"
 				aria-labelledby="modal-title"
+				data-testid="task-modal"
 			>
 				{/* ヘッダー */}
 				<div className="flex items-center justify-between px-4 py-3 border-b border-border">
-					<h2 id="modal-title" className="text-lg font-semibold text-foreground">
+					<h2
+						id="modal-title"
+						className="text-lg font-semibold text-foreground"
+						data-testid="modal-title"
+					>
 						{isEditMode ? 'Edit Task' : 'New Task'}
 					</h2>
 					<button
 						type="button"
 						onClick={onClose}
 						className="p-1 rounded-md text-muted-foreground hover:text-foreground hover:bg-muted transition-colors"
+						data-testid="modal-close"
 					>
 						<X className="h-5 w-5" />
 					</button>
 				</div>
 
 				{/* フォーム */}
-				<form onSubmit={handleSubmit} className="p-4 space-y-4">
+				<form onSubmit={handleSubmit} className="p-4 space-y-4" data-testid="task-form">
 					{/* タイトル */}
 					<div className="space-y-2">
 						<label htmlFor="title" className="block text-sm font-medium text-foreground">
@@ -151,6 +157,7 @@ export function TaskModal({
 								'focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent',
 							)}
 							required
+							data-testid="input-title"
 						/>
 					</div>
 
@@ -169,6 +176,7 @@ export function TaskModal({
 								'text-foreground',
 								'focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent',
 							)}
+							data-testid="select-status"
 						>
 							{statuses.map((s) => (
 								<option key={s} value={s}>
@@ -193,6 +201,7 @@ export function TaskModal({
 								'text-foreground',
 								'focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent',
 							)}
+							data-testid="select-path"
 						>
 							{pathOptions.map((opt) => (
 								<option key={opt.value} value={opt.value}>
@@ -215,6 +224,7 @@ export function TaskModal({
 										'text-sm text-destructive',
 										'hover:bg-destructive/10 transition-colors',
 									)}
+									data-testid="button-delete"
 								>
 									<Trash2 className="h-4 w-4" />
 									Delete
@@ -232,6 +242,7 @@ export function TaskModal({
 									'text-sm text-muted-foreground',
 									'hover:bg-muted transition-colors',
 								)}
+								data-testid="button-cancel"
 							>
 								Cancel
 							</button>
@@ -243,6 +254,7 @@ export function TaskModal({
 									'bg-primary text-primary-foreground',
 									'hover:bg-primary/90 transition-colors',
 								)}
+								data-testid="button-submit"
 							>
 								{isEditMode ? 'Update' : 'Create'}
 							</button>

@@ -46,6 +46,7 @@ export function TaskCard({ task, onClick }: TaskCardProps) {
 			)}
 			onClick={handleClick}
 			onKeyDown={handleKeyDown}
+			data-testid={`task-card-${task.id}`}
 		>
 			{/* ドラッグハンドル */}
 			<span
@@ -61,6 +62,7 @@ export function TaskCard({ task, onClick }: TaskCardProps) {
 					e.stopPropagation();
 					listeners?.onPointerDown?.(e);
 				}}
+				data-testid={`drag-handle-${task.id}`}
 			>
 				<GripVertical className="h-4 w-4" />
 			</span>
@@ -73,13 +75,14 @@ export function TaskCard({ task, onClick }: TaskCardProps) {
 						'block text-sm font-medium text-foreground break-words',
 						task.isChecked && 'line-through text-muted-foreground',
 					)}
+					data-testid={`task-title-${task.id}`}
 				>
 					<MarkdownText>{task.title}</MarkdownText>
 				</span>
 
 				{/* パスバッジ */}
 				{task.path.length > 0 && (
-					<span className="block mt-2">
+					<span className="block mt-2" data-testid={`task-path-${task.id}`}>
 						<PathBadge path={task.path} />
 					</span>
 				)}
@@ -98,6 +101,7 @@ export function TaskCardOverlay({ task }: { task: TaskDto }) {
 				'bg-card border border-primary rounded-lg p-3 shadow-xl',
 				'cursor-grabbing rotate-3 scale-105',
 			)}
+			data-testid="drag-overlay"
 		>
 			<div className="pl-4">
 				<p className="text-sm font-medium text-foreground break-words">

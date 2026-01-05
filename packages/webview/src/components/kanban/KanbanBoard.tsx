@@ -135,7 +135,7 @@ export function KanbanBoard() {
 	// ローディング表示
 	if (isLoading) {
 		return (
-			<div className="flex items-center justify-center h-full">
+			<div className="flex items-center justify-center h-full" data-testid="kanban-loading">
 				<div className="flex flex-col items-center gap-4 text-muted-foreground">
 					<Loader2 className="h-8 w-8 animate-spin" />
 					<p className="text-sm">Loading tasks...</p>
@@ -147,10 +147,10 @@ export function KanbanBoard() {
 	// エラー表示
 	if (error) {
 		return (
-			<div className="flex items-center justify-center h-full">
+			<div className="flex items-center justify-center h-full" data-testid="kanban-error">
 				<div className="flex flex-col items-center gap-4 text-destructive">
 					<AlertCircle className="h-8 w-8" />
-					<p className="text-sm">{error}</p>
+					<p className="text-sm" data-testid="error-message">{error}</p>
 					<button
 						type="button"
 						onClick={() => {
@@ -163,6 +163,7 @@ export function KanbanBoard() {
 							'bg-primary text-primary-foreground',
 							'hover:bg-primary/90 transition-colors',
 						)}
+						data-testid="retry-button"
 					>
 						<RefreshCw className="h-4 w-4" />
 						Retry
@@ -175,7 +176,7 @@ export function KanbanBoard() {
 	return (
 		<>
 			<DndContext sensors={sensors} onDragStart={handleDragStart} onDragEnd={handleDragEnd}>
-				<div className="flex gap-4 p-4 h-full overflow-x-auto">
+				<div className="flex gap-4 p-4 h-full overflow-x-auto" data-testid="kanban-board">
 					{config.statuses.map((status) => (
 						<Column
 							key={status}
