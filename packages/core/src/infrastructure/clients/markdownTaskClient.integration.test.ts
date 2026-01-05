@@ -652,6 +652,47 @@ kanban:
 				const updated = result._unsafeUnwrap();
 				expect(updated).toContain('status: in-progress');
 			});
+
+			it('CRLF改行のMarkdownでもステータスを正しく更新できる', () => {
+				// Windows環境ではCRLF(\r\n)が使われる
+				// status行が中間にある場合、split('\n')後に\rが残る
+				const markdown = '- [ ] タスク1\r\n  - status: todo\r\n  - priority: high';
+				const newStatus = Status.create('in-progress')._unsafeUnwrap();
+				const result = client.applyEdit(markdown, {
+					taskId: generateTaskId(Path.create([]), 'タスク1'),
+					newStatus,
+				});
+
+				expect(result.isOk()).toBe(true);
+				const updated = result._unsafeUnwrap();
+
+				// 新しいstatusが含まれること
+				expect(updated).toContain('status: in-progress');
+				// 古いstatusが残っていないこと
+				expect(updated).not.toContain('status: todo');
+				// status行が1つだけであること（重複していないこと）
+				const statusCount = (updated.match(/status:/g) || []).length;
+				expect(statusCount).toBe(1);
+				// 他のメタデータは保持されていること
+				expect(updated).toContain('priority: high');
+			});
+
+			it('CRLF改行でstatus行が最後にある場合も正しく更新できる', () => {
+				const markdown = '- [ ] タスク1\r\n  - status: todo';
+				const newStatus = Status.create('done')._unsafeUnwrap();
+				const result = client.applyEdit(markdown, {
+					taskId: generateTaskId(Path.create([]), 'タスク1'),
+					newStatus,
+					doneStatuses: ['done'],
+				});
+
+				expect(result.isOk()).toBe(true);
+				const updated = result._unsafeUnwrap();
+
+				expect(updated).toContain('status: done');
+				expect(updated).not.toContain('status: todo');
+				expect(updated).toContain('[x]');
+			});
 		});
 
 		describe('パス変更', () => {
