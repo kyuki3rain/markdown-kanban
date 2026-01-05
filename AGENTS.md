@@ -24,6 +24,7 @@
 | 技術原則 | 不変の技術原則・アーキテクチャ・コーディング規約 | [docs/CONSTITUTION.md](./docs/CONSTITUTION.md) |
 | 開発計画 | 今後のロードマップ | [docs/PLAN.md](./docs/PLAN.md) |
 | 要件定義 | バージョンごとの機能要件 | [docs/requirements/](./docs/requirements/) |
+| Hotfixワークフロー | 緊急バグ修正のリリース手順 | [docs/HOTFIX_WORKFLOW.md](./docs/HOTFIX_WORKFLOW.md) |
 
 ---
 
