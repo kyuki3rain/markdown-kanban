@@ -1,12 +1,26 @@
+import type { DragEndEvent } from '@dnd-kit/core';
 import { act, render, screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 import { createMockConfig, createMockTask } from '../../test/factories';
 import { getMockVsCodeApi, simulateExtensionMessage } from '../../test/mocks/vscodeApi';
 
+// Store onDragEnd callback for testing
+let capturedOnDragEnd: ((event: DragEndEvent) => void) | null = null;
+
 // Mock DnD kit
 vi.mock('@dnd-kit/core', () => ({
-	DndContext: ({ children }: { children: React.ReactNode }) => <>{children}</>,
+	DndContext: ({
+		children,
+		onDragEnd,
+	}: {
+		children: React.ReactNode;
+		onDragEnd?: (event: DragEndEvent) => void;
+	}) => {
+		// Capture the onDragEnd callback for testing
+		capturedOnDragEnd = onDragEnd ?? null;
+		return <>{children}</>;
+	},
 	DragOverlay: ({ children }: { children: React.ReactNode }) => <>{children}</>,
 	useDroppable: () => ({
 		isOver: false,
@@ -26,6 +40,7 @@ vi.mock('@dnd-kit/core', () => ({
 // Reset module cache before each test
 beforeEach(async () => {
 	vi.resetModules();
+	capturedOnDragEnd = null;
 });
 
 describe('KanbanBoard', () => {
@@ -364,6 +379,140 @@ describe('KanbanBoard', () => {
 
 			expect(getMockVsCodeApi().postMessage).toHaveBeenCalledWith({
 				type: 'REVERT_DOCUMENT',
+			});
+		});
+	});
+
+	describe('Drag and Drop', () => {
+		it('should change task status when dropped on different column', async () => {
+			const { KanbanBoard } = await import('./KanbanBoard');
+			render(<KanbanBoard />);
+
+			const task = createMockTask({ id: 'task-1', title: 'Draggable Task', status: 'todo' });
+
+			act(() => {
+				simulateExtensionMessage({
+					type: 'CONFIG_UPDATED',
+					payload: { config: createMockConfig() },
+				});
+				simulateExtensionMessage({
+					type: 'TASKS_UPDATED',
+					payload: { tasks: [task] },
+				});
+			});
+
+			await waitFor(() => {
+				expect(screen.getByText('Draggable Task')).toBeInTheDocument();
+			});
+
+			// Clear previous calls
+			getMockVsCodeApi().postMessage.mockClear();
+
+			// Simulate drag end event: drag task-1 from 'todo' to 'done'
+			expect(capturedOnDragEnd).not.toBeNull();
+			act(() => {
+				capturedOnDragEnd?.({
+					active: {
+						id: 'task-1',
+						data: { current: { task } },
+					},
+					over: {
+						id: 'done',
+					},
+				} as unknown as DragEndEvent);
+			});
+
+			expect(getMockVsCodeApi().postMessage).toHaveBeenCalledWith({
+				type: 'CHANGE_TASK_STATUS',
+				payload: { id: 'task-1', status: 'done' },
+			});
+		});
+
+		it('should not change status when dropped on same column', async () => {
+			const { KanbanBoard } = await import('./KanbanBoard');
+			render(<KanbanBoard />);
+
+			const task = createMockTask({ id: 'task-1', title: 'Draggable Task', status: 'todo' });
+
+			act(() => {
+				simulateExtensionMessage({
+					type: 'CONFIG_UPDATED',
+					payload: { config: createMockConfig() },
+				});
+				simulateExtensionMessage({
+					type: 'TASKS_UPDATED',
+					payload: { tasks: [task] },
+				});
+			});
+
+			await waitFor(() => {
+				expect(screen.getByText('Draggable Task')).toBeInTheDocument();
+			});
+
+			// Clear previous calls
+			getMockVsCodeApi().postMessage.mockClear();
+
+			// Simulate drag end event: drag task-1 within 'todo' column (no change)
+			expect(capturedOnDragEnd).not.toBeNull();
+			act(() => {
+				capturedOnDragEnd?.({
+					active: {
+						id: 'task-1',
+						data: { current: { task } },
+					},
+					over: {
+						id: 'todo', // Same as current status
+					},
+				} as unknown as DragEndEvent);
+			});
+
+			// Should NOT call CHANGE_TASK_STATUS
+			expect(getMockVsCodeApi().postMessage).not.toHaveBeenCalledWith({
+				type: 'CHANGE_TASK_STATUS',
+				payload: expect.anything(),
+			});
+		});
+
+		it('should not change status when dropped outside any column', async () => {
+			const { KanbanBoard } = await import('./KanbanBoard');
+			render(<KanbanBoard />);
+
+			const task = createMockTask({ id: 'task-1', title: 'Draggable Task', status: 'todo' });
+
+			act(() => {
+				simulateExtensionMessage({
+					type: 'CONFIG_UPDATED',
+					payload: { config: createMockConfig() },
+				});
+				simulateExtensionMessage({
+					type: 'TASKS_UPDATED',
+					payload: { tasks: [task] },
+				});
+			});
+
+			await waitFor(() => {
+				expect(screen.getByText('Draggable Task')).toBeInTheDocument();
+			});
+
+			// Clear previous calls
+			getMockVsCodeApi().postMessage.mockClear();
+
+			// Simulate drag end event: dropped outside (over is null)
+			expect(capturedOnDragEnd).not.toBeNull();
+			act(() => {
+				capturedOnDragEnd?.({
+					active: {
+						id: 'task-1',
+						data: { current: { task } },
+					},
+					over: null,
+				} as unknown as DragEndEvent);
+			});
+
+			// Should NOT call CHANGE_TASK_STATUS
+			expect(getMockVsCodeApi().postMessage).not.toHaveBeenCalledWith({
+				type: 'CHANGE_TASK_STATUS',
+				payload: expect.anything(),
 			});
 		});
 	});
