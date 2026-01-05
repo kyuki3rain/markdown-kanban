@@ -30,7 +30,7 @@ export function cleanupTempDir(dir: string): void {
 }
 
 /**
- * WebView内の要素を待機して取得
+ * WebView内の要素を待機して取得（WebViewオブジェクト使用）
  */
 export async function waitForElement(
 	webview: WebView,
@@ -44,7 +44,20 @@ export async function waitForElement(
 }
 
 /**
- * WebView内の複数要素を取得
+ * ドライバーを使って要素を待機して取得（フレーム切り替え後用）
+ */
+export async function waitForElementByDriver(
+	driver: WebDriver,
+	testId: string,
+	timeout = 10000,
+): Promise<WebElement> {
+	const locator = By.css(`[data-testid="${testId}"]`);
+	await driver.wait(until.elementLocated(locator), timeout);
+	return driver.findElement(locator);
+}
+
+/**
+ * WebView内の複数要素を取得（WebViewオブジェクト使用）
  */
 export async function findElements(webview: WebView, testId: string): Promise<WebElement[]> {
 	const locator = By.css(`[data-testid="${testId}"]`);
@@ -52,7 +65,18 @@ export async function findElements(webview: WebView, testId: string): Promise<We
 }
 
 /**
- * WebView内の要素をクリック
+ * ドライバーを使って複数要素を取得
+ */
+export async function findElementsByDriver(
+	driver: WebDriver,
+	testId: string,
+): Promise<WebElement[]> {
+	const locator = By.css(`[data-testid="${testId}"]`);
+	return driver.findElements(locator);
+}
+
+/**
+ * WebView内の要素をクリック（WebViewオブジェクト使用）
  */
 export async function clickElement(webview: WebView, testId: string): Promise<void> {
 	const element = await waitForElement(webview, testId);
@@ -60,7 +84,15 @@ export async function clickElement(webview: WebView, testId: string): Promise<vo
 }
 
 /**
- * WebView内の入力フィールドに値を設定
+ * ドライバーを使って要素をクリック
+ */
+export async function clickElementByDriver(driver: WebDriver, testId: string): Promise<void> {
+	const element = await waitForElementByDriver(driver, testId);
+	await element.click();
+}
+
+/**
+ * WebView内の入力フィールドに値を設定（WebViewオブジェクト使用）
  */
 export async function setInputValue(
 	webview: WebView,
@@ -73,7 +105,20 @@ export async function setInputValue(
 }
 
 /**
- * WebView内のセレクトボックスの値を設定
+ * ドライバーを使って入力フィールドに値を設定
+ */
+export async function setInputValueByDriver(
+	driver: WebDriver,
+	testId: string,
+	value: string,
+): Promise<void> {
+	const element = await waitForElementByDriver(driver, testId);
+	await element.clear();
+	await element.sendKeys(value);
+}
+
+/**
+ * WebView内のセレクトボックスの値を設定（WebViewオブジェクト使用）
  */
 export async function setSelectValue(
 	webview: WebView,
@@ -87,7 +132,20 @@ export async function setSelectValue(
 }
 
 /**
- * 要素のテキストを取得
+ * ドライバーを使ってセレクトボックスの値を設定
+ */
+export async function setSelectValueByDriver(
+	driver: WebDriver,
+	testId: string,
+	value: string,
+): Promise<void> {
+	const element = await waitForElementByDriver(driver, testId);
+	const option = await element.findElement(By.css(`option[value="${value}"]`));
+	await option.click();
+}
+
+/**
+ * 要素のテキストを取得（WebViewオブジェクト使用）
  */
 export async function getElementText(webview: WebView, testId: string): Promise<string> {
 	const element = await waitForElement(webview, testId);
@@ -95,11 +153,31 @@ export async function getElementText(webview: WebView, testId: string): Promise<
 }
 
 /**
- * 要素が存在するかチェック
+ * ドライバーを使って要素のテキストを取得
+ */
+export async function getElementTextByDriver(driver: WebDriver, testId: string): Promise<string> {
+	const element = await waitForElementByDriver(driver, testId);
+	return element.getText();
+}
+
+/**
+ * 要素が存在するかチェック（WebViewオブジェクト使用）
  */
 export async function elementExists(webview: WebView, testId: string): Promise<boolean> {
 	try {
 		const elements = await findElements(webview, testId);
+		return elements.length > 0;
+	} catch {
+		return false;
+	}
+}
+
+/**
+ * ドライバーを使って要素が存在するかチェック
+ */
+export async function elementExistsByDriver(driver: WebDriver, testId: string): Promise<boolean> {
+	try {
+		const elements = await findElementsByDriver(driver, testId);
 		return elements.length > 0;
 	} catch {
 		return false;
@@ -114,14 +192,24 @@ export function sleep(ms: number): Promise<void> {
 }
 
 /**
- * カンバンボードが表示されるまで待機
+ * カンバンボードが表示されるまで待機（WebViewオブジェクト使用）
  */
 export async function waitForKanbanBoard(webview: WebView, timeout = 15000): Promise<void> {
 	await waitForElement(webview, 'kanban-board', timeout);
 }
 
 /**
- * 特定のカラムに含まれるタスク数を取得
+ * ドライバーを使ってカンバンボードが表示されるまで待機
+ */
+export async function waitForKanbanBoardByDriver(
+	driver: WebDriver,
+	timeout = 15000,
+): Promise<void> {
+	await waitForElementByDriver(driver, 'kanban-board', timeout);
+}
+
+/**
+ * 特定のカラムに含まれるタスク数を取得（WebViewオブジェクト使用）
  */
 export async function getTaskCountInColumn(webview: WebView, status: string): Promise<number> {
 	const text = await getElementText(webview, `column-count-${status}`);
@@ -129,13 +217,35 @@ export async function getTaskCountInColumn(webview: WebView, status: string): Pr
 }
 
 /**
- * 特定のカラムに含まれるタスクカード要素を取得
+ * ドライバーを使ってタスク数を取得
+ */
+export async function getTaskCountInColumnByDriver(
+	driver: WebDriver,
+	status: string,
+): Promise<number> {
+	const text = await getElementTextByDriver(driver, `column-count-${status}`);
+	return Number.parseInt(text, 10);
+}
+
+/**
+ * 特定のカラムに含まれるタスクカード要素を取得（WebViewオブジェクト使用）
  */
 export async function getTaskCardsInColumn(
 	webview: WebView,
 	status: string,
 ): Promise<WebElement[]> {
 	const taskList = await waitForElement(webview, `task-list-${status}`);
+	return taskList.findElements(By.css('[data-testid^="task-card-"]'));
+}
+
+/**
+ * ドライバーを使ってタスクカード要素を取得
+ */
+export async function getTaskCardsInColumnByDriver(
+	driver: WebDriver,
+	status: string,
+): Promise<WebElement[]> {
+	const taskList = await waitForElementByDriver(driver, `task-list-${status}`);
 	return taskList.findElements(By.css('[data-testid^="task-card-"]'));
 }
 
@@ -208,4 +318,44 @@ kanban:
  */
 export function getWebView(): WebView {
 	return new WebView();
+}
+
+/**
+ * WebViewパネルのiframeに直接スイッチする（パネルタイプのWebView用）
+ * vscode-extension-testerの標準WebViewクラスはエディタ内WebViewを想定しているため、
+ * パネルタイプのWebViewには対応していない場合がある
+ */
+export async function switchToWebViewFrame(driver: WebDriver, timeout = 10000): Promise<void> {
+	// WebViewパネルのiframeを探す
+	// VSCodeのWebViewは "webview ready" クラスを持つiframeとして表示される
+	const iframeLocator = By.css('iframe.webview.ready');
+
+	await driver.wait(until.elementLocated(iframeLocator), timeout);
+	const iframes = await driver.findElements(iframeLocator);
+
+	if (iframes.length === 0) {
+		throw new Error('No WebView iframe found');
+	}
+
+	// 最後に追加されたiframe（最新のWebViewパネル）を選択
+	const targetIframe = iframes[iframes.length - 1];
+	await driver.switchTo().frame(targetIframe);
+
+	// WebViewの内部にはさらにネストされたiframeがある場合がある
+	// active-frame というIDを持つiframeを探す
+	try {
+		const innerFrameLocator = By.id('active-frame');
+		await driver.wait(until.elementLocated(innerFrameLocator), 5000);
+		const innerFrame = await driver.findElement(innerFrameLocator);
+		await driver.switchTo().frame(innerFrame);
+	} catch {
+		// 内部フレームがない場合は現在のフレームで続行
+	}
+}
+
+/**
+ * WebViewフレームから抜けてデフォルトコンテキストに戻る
+ */
+export async function switchBackFromWebView(driver: WebDriver): Promise<void> {
+	await driver.switchTo().defaultContent();
 }
