@@ -136,7 +136,7 @@
     "test:watch": "pnpm --filter @md-tasks/core run test:watch",
     "test:coverage": "pnpm --filter @md-tasks/core run test:coverage",
     "test:e2e": "pnpm run pretest:e2e && pnpm --filter @md-tasks/core exec vscode-test",
-    "test:ui": "pnpm run pretest:ui && extest setup-and-run out/ui-test/**/*.test.js --mocha_config packages/core/.mocharc.json"
+    "test:ui": "pnpm run pretest:ui && extest setup-and-run out/ui-test/**/*.test.js --mocha_config packages/core/.mocharc.json --storage test-resources"
   },
   "devDependencies": {
     "@types/chai": "^5.2.3",
