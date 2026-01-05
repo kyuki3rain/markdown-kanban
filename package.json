@@ -123,11 +123,9 @@
     "watch:webview": "pnpm --filter @md-tasks/webview run watch",
     "package": "pnpm --filter @md-tasks/core run check-types && pnpm --filter @md-tasks/core run lint && node packages/core/esbuild.js --production && pnpm --filter @md-tasks/webview run build",
     "compile-tests": "node packages/core/esbuild.e2e.js",
-    "compile-ui-tests": "pnpm --filter @md-tasks/core exec node esbuild.ui-test.js",
     "watch-tests": "node packages/core/esbuild.e2e.js --watch",
     "pretest": "pnpm --filter @md-tasks/core run check-types && pnpm --filter @md-tasks/core run lint",
     "pretest:e2e": "pnpm run compile-tests && pnpm run compile",
-    "pretest:ui": "pnpm run compile-ui-tests && pnpm run compile",
     "check-types": "pnpm --filter @md-tasks/core run check-types",
     "lint": "pnpm --filter @md-tasks/core run lint",
     "lint:fix": "pnpm --filter @md-tasks/core run lint:fix",
@@ -135,14 +133,10 @@
     "test": "pnpm --filter @md-tasks/core run test",
     "test:watch": "pnpm --filter @md-tasks/core run test:watch",
     "test:coverage": "pnpm --filter @md-tasks/core run test:coverage",
-    "test:e2e": "pnpm run pretest:e2e && pnpm --filter @md-tasks/core exec vscode-test",
-    "test:ui": "pnpm run pretest:ui && extest setup-and-run out/ui-test/**/*.test.js --mocha_config packages/core/.mocharc.json --storage test-resources"
+    "test:e2e": "pnpm run pretest:e2e && pnpm --filter @md-tasks/core exec vscode-test"
   },
   "devDependencies": {
-    "@types/chai": "^5.2.3",
     "@vscode/vsce": "^3.5.0",
-    "chai": "^6.2.2",
-    "npm-run-all": "^4.1.5",
-    "vscode-extension-tester": "^8.19.0"
+    "npm-run-all": "^4.1.5"
   }
 }

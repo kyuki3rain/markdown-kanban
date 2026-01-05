@@ -1,8 +1,0 @@
-{
-	"spec": "out/ui-test/**/*.test.js",
-	"timeout": 120000,
-	"slow": 30000,
-	"reporter": "spec",
-	"require": [],
-	"ui": "bdd"
-}
