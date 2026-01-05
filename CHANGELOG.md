@@ -5,6 +5,14 @@ All notable changes to the "md-tasks" extension will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.1.2] - 2026-01-05
+
+### Fixed
+
+- Fix status update failing on Windows due to CRLF line endings (#84)
+  - When editing Markdown files with CRLF line endings, changing task status via drag & drop would add a new status line instead of updating the existing one
+  - This caused the status to appear unchanged because the last status line was read on parse
+
 ## [0.1.1] - 2025-12-29
 
 ### Changed

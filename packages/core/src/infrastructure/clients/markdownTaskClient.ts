@@ -618,10 +618,11 @@ export class MarkdownTaskClient {
 
 	/**
 	 * タスク行内のステータス行のインデックスを見つける
+	 * 注: Windows環境でCRLF改行の場合、split('\n')後に\rが残るため\r?で対応
 	 */
 	private findStatusLineIndex(taskLines: string[]): number {
 		for (let i = 1; i < taskLines.length; i++) {
-			if (taskLines[i].match(/^\s*-\s*status:\s*.+$/)) {
+			if (taskLines[i].match(/^\s*-\s*status:\s*.+?\r?$/)) {
 				return i;
 			}
 		}
