@@ -2,7 +2,9 @@ import * as fs from 'node:fs';
 import * as os from 'node:os';
 import * as path from 'node:path';
 import { By, until, type WebDriver, type WebElement } from 'selenium-webdriver';
-import type { WebView, Workbench } from 'vscode-extension-tester';
+import { WebView, type Workbench } from 'vscode-extension-tester';
+
+export type { WebView };
 
 /**
  * テスト用のテンポラリディレクトリを作成
@@ -199,3 +201,11 @@ kanban:
 - [ ] Task 2
   - status: doing
 `;
+
+/**
+ * WebViewパネルを取得する
+ * コマンド実行後、開いているWebViewパネルを取得
+ */
+export function getWebView(): WebView {
+	return new WebView();
+}

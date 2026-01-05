@@ -7,6 +7,7 @@ import {
 	createTestMarkdownFile,
 	DEFAULT_TEST_MARKDOWN,
 	getTaskCountInColumn,
+	getWebView,
 	sleep,
 	waitForKanbanBoard,
 } from './utils/testHelper';
@@ -52,8 +53,7 @@ describe('Sync Tests', function () {
 			await workbench.executeCommand('MD Tasks: Open Kanban Board');
 			await sleep(3000);
 
-			const editorView = workbench.getEditorView();
-			webview = (await editorView.openEditor('sync-test.md')) as unknown as WebView;
+			webview = getWebView();
 			await webview.switchToFrame(10000);
 			await waitForKanbanBoard(webview);
 		});

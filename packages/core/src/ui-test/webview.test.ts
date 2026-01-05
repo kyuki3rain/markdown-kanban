@@ -12,6 +12,7 @@ import {
 	getElementText,
 	getTaskCardsInColumn,
 	getTaskCountInColumn,
+	getWebView,
 	setInputValue,
 	setSelectValue,
 	sleep,
@@ -121,8 +122,7 @@ describe('WebView UI Tests', function () {
 			await sleep(3000);
 
 			// WebViewを取得してフレームに切り替え
-			const editorView = workbench.getEditorView();
-			webview = (await editorView.openEditor('display-test.md')) as unknown as WebView;
+			webview = getWebView();
 			await webview.switchToFrame(10000);
 		});
 
@@ -217,8 +217,7 @@ describe('WebView UI Tests', function () {
 			await workbench.executeCommand('MD Tasks: Open Kanban Board');
 			await sleep(3000);
 
-			const editorView = workbench.getEditorView();
-			webview = (await editorView.openEditor('frontmatter-test.md')) as unknown as WebView;
+			webview = getWebView();
 			await webview.switchToFrame(10000);
 			await waitForKanbanBoard(webview);
 
@@ -253,8 +252,7 @@ describe('WebView UI Tests', function () {
 			await workbench.executeCommand('MD Tasks: Open Kanban Board');
 			await sleep(3000);
 
-			const editorView = workbench.getEditorView();
-			webview = (await editorView.openEditor('modal-test.md')) as unknown as WebView;
+			webview = getWebView();
 			await webview.switchToFrame(10000);
 			await waitForKanbanBoard(webview);
 		});
@@ -400,8 +398,7 @@ describe('WebView UI Tests', function () {
 			await workbench.executeCommand('MD Tasks: Open Kanban Board');
 			await sleep(3000);
 
-			const editorView = workbench.getEditorView();
-			webview = (await editorView.openEditor('floating-actions-test.md')) as unknown as WebView;
+			webview = getWebView();
 			await webview.switchToFrame(10000);
 			await waitForKanbanBoard(webview);
 		});

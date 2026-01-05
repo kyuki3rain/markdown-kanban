@@ -10,6 +10,7 @@ import {
 	elementExists,
 	getTaskCardsInColumn,
 	getTaskCountInColumn,
+	getWebView,
 	sleep,
 	waitForKanbanBoard,
 } from './utils/testHelper';
@@ -54,8 +55,7 @@ describe('Drag and Drop Tests', function () {
 			await workbench.executeCommand('MD Tasks: Open Kanban Board');
 			await sleep(3000);
 
-			const editorView = workbench.getEditorView();
-			webview = (await editorView.openEditor('dnd-test.md')) as unknown as WebView;
+			webview = getWebView();
 			await webview.switchToFrame(10000);
 			await waitForKanbanBoard(webview);
 		});

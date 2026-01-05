@@ -5,6 +5,7 @@ import {
 	createTempDir,
 	createTestMarkdownFile,
 	elementExists,
+	getWebView,
 	sleep,
 	waitForKanbanBoard,
 } from './utils/testHelper';
@@ -74,8 +75,7 @@ describe('Error Handling Tests', function () {
 			await workbench.executeCommand('MD Tasks: Open Kanban Board');
 			await sleep(3000);
 
-			const editorView = workbench.getEditorView();
-			webview = (await editorView.openEditor('partially-broken.md')) as unknown as WebView;
+			webview = getWebView();
 			await webview.switchToFrame(10000);
 			await waitForKanbanBoard(webview);
 
@@ -104,8 +104,7 @@ No tasks here.
 			await workbench.executeCommand('MD Tasks: Open Kanban Board');
 			await sleep(3000);
 
-			const editorView = workbench.getEditorView();
-			webview = (await editorView.openEditor('empty-tasks.md')) as unknown as WebView;
+			webview = getWebView();
 			await webview.switchToFrame(10000);
 
 			// カンバンボードまたはエラーUIが表示されるまで待機
@@ -132,8 +131,7 @@ No tasks here.
 			await workbench.executeCommand('MD Tasks: Open Kanban Board');
 			await sleep(3000);
 
-			const editorView = workbench.getEditorView();
-			webview = (await editorView.openEditor('retry-test.md')) as unknown as WebView;
+			webview = getWebView();
 			await webview.switchToFrame(10000);
 			await waitForKanbanBoard(webview);
 
