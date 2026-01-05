@@ -116,12 +116,12 @@
     "pretest": "pnpm --filter @md-tasks/core run check-types && pnpm --filter @md-tasks/core run lint",
     "pretest:e2e": "pnpm run compile-tests && pnpm run compile",
     "check-types": "pnpm --filter @md-tasks/core run check-types",
-    "lint": "pnpm --filter @md-tasks/core run lint",
-    "lint:fix": "pnpm --filter @md-tasks/core run lint:fix",
-    "format": "pnpm --filter @md-tasks/core run format",
-    "test": "pnpm --filter @md-tasks/core run test",
+    "lint": "pnpm --filter @md-tasks/core run lint && pnpm --filter @md-tasks/webview run lint",
+    "lint:fix": "pnpm --filter @md-tasks/core run lint:fix && pnpm --filter @md-tasks/webview run lint:fix",
+    "format": "pnpm --filter @md-tasks/core run format && pnpm --filter @md-tasks/webview run format",
+    "test": "pnpm --filter @md-tasks/core run test && pnpm --filter @md-tasks/webview run test",
     "test:watch": "pnpm --filter @md-tasks/core run test:watch",
-    "test:coverage": "pnpm --filter @md-tasks/core run test:coverage",
+    "test:coverage": "pnpm --filter @md-tasks/core run test:coverage && pnpm --filter @md-tasks/webview run test:coverage",
     "test:e2e": "pnpm run pretest:e2e && pnpm --filter @md-tasks/core exec vscode-test"
   },
   "devDependencies": {

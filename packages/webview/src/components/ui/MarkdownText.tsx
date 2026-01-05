@@ -1,8 +1,8 @@
+import type { KeyboardEvent, MouseEvent } from 'react';
 import { useCallback, useMemo } from 'react';
+import type { Components } from 'react-markdown';
 import Markdown from 'react-markdown';
 import remarkGfm from 'remark-gfm';
-import type { Components } from 'react-markdown';
-import type { MouseEvent, KeyboardEvent } from 'react';
 
 interface MarkdownTextProps {
 	children: string;

@@ -1,6 +1,6 @@
-import type { KeyboardEvent } from 'react';
 import { useDraggable } from '@dnd-kit/core';
 import { GripVertical } from 'lucide-react';
+import type { KeyboardEvent } from 'react';
 import { cn } from '../../lib/utils';
 import type { TaskDto } from '../../types';
 import { MarkdownText } from '../ui/MarkdownText';
