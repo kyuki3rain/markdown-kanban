@@ -41,7 +41,6 @@ kanban:
 
 	beforeEach(() => {
 		mockRemarkClient = {
-			parseMarkdown: vi.fn(),
 			updateFrontmatter: vi.fn().mockReturnValue(mockUpdatedMarkdown),
 		} as unknown as RemarkClient;
 
