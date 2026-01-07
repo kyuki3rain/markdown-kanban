@@ -31,6 +31,11 @@ export interface KanbanConfig {
 	 * Done時にチェックボックスも連動させるか
 	 */
 	syncCheckboxWithDone: boolean;
+
+	/**
+	 * フィルタリング対象パス（空配列の場合は全タスク表示）
+	 */
+	filterPaths: string[];
 }
 
 /**
@@ -43,6 +48,7 @@ export const DEFAULT_CONFIG: KanbanConfig = {
 	defaultDoneStatus: 'done',
 	sortBy: 'markdown',
 	syncCheckboxWithDone: true,
+	filterPaths: [],
 };
 
 /**

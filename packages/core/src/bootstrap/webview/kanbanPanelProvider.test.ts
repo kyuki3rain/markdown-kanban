@@ -360,6 +360,35 @@ describe('KanbanPanelProvider', () => {
 			});
 		});
 
+		it('タスク取得時、CONFIG_UPDATEDメッセージも送信する', async () => {
+			const mockTasks = [{ id: 'task-1', title: 'Test Task' }];
+			const mockConfig = { statuses: ['todo', 'done'], filterPaths: ['Project'] };
+			mockContainer.getTaskController = vi.fn(() => ({
+				getTasks: vi.fn().mockResolvedValue({ isOk: () => true, value: mockTasks }),
+			})) as unknown as typeof mockContainer.getTaskController;
+			mockContainer.getConfigController = vi.fn(() => ({
+				getConfig: vi.fn().mockResolvedValue(mockConfig),
+			})) as unknown as typeof mockContainer.getConfigController;
+
+			provider.showOrCreate();
+			vi.clearAllMocks();
+
+			// アクティブエディタ変更でsendTasksUpdateを呼び出す
+			const mockEditor = {
+				document: {
+					languageId: 'markdown',
+					uri: { toString: () => 'file:///test.md' },
+					isDirty: false,
+				},
+			};
+			await activeEditorChangeCallback?.(mockEditor);
+
+			expect(mockWebview.postMessage).toHaveBeenCalledWith({
+				type: 'CONFIG_UPDATED',
+				payload: { config: mockConfig },
+			});
+		});
+
 		it('タスク取得失敗時、TASKS_UPDATEDは送信せずDOCUMENT_STATE_CHANGEDのみ送信する', async () => {
 			mockContainer.getTaskController = vi.fn(() => ({
 				getTasks: vi.fn().mockResolvedValue({ isOk: () => false, error: new Error('Failed') }),

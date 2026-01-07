@@ -66,6 +66,7 @@ describe('WebViewMessageClient', () => {
 				defaultDoneStatus: 'done',
 				sortBy: 'markdown' as const,
 				syncCheckboxWithDone: true,
+				filterPaths: [],
 			};
 
 			client.sendConfigUpdated(config);

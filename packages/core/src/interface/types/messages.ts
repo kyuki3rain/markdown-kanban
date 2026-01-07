@@ -94,6 +94,16 @@ export interface RevertDocumentRequest {
 }
 
 /**
+ * 設定更新リクエスト
+ */
+export interface UpdateConfigRequest {
+	type: 'UPDATE_CONFIG';
+	payload: {
+		filterPaths?: string[];
+	};
+}
+
+/**
  * WebView → Extension の全メッセージタイプ
  */
 export type WebViewToExtensionMessage =
@@ -104,7 +114,8 @@ export type WebViewToExtensionMessage =
 	| ChangeTaskStatusRequest
 	| GetConfigRequest
 	| SaveDocumentRequest
-	| RevertDocumentRequest;
+	| RevertDocumentRequest
+	| UpdateConfigRequest;
 
 // =============================================================================
 // Extension → WebView メッセージ

@@ -42,6 +42,9 @@ export class WebViewMessageHandler {
 			case 'GET_CONFIG':
 				await this.handleGetConfig();
 				break;
+			case 'UPDATE_CONFIG':
+				await this.handleUpdateConfig(message.payload);
+				break;
 			case 'SAVE_DOCUMENT':
 				await this.handleSaveDocument();
 				break;
@@ -146,6 +149,23 @@ export class WebViewMessageHandler {
 	private async handleGetConfig(): Promise<void> {
 		const config = await this.configController.getConfig();
 		this.messageClient.sendConfigUpdated(config);
+	}
+
+	/**
+	 * 設定更新を処理する
+	 * 注: 成功時は設定を再取得して送信（WebViewにフォーカスがある場合、ドキュメント変更イベントが発火しないため）
+	 */
+	private async handleUpdateConfig(payload: { filterPaths?: string[] }): Promise<void> {
+		const result = await this.configController.updateConfig(payload);
+
+		if (result.isErr()) {
+			this.sendError(result.error);
+		} else {
+			// 成功時は設定を再取得してCONFIG_UPDATEDを送信
+			// WebViewにフォーカスがある場合、ドキュメント変更イベントが発火しないため明示的に送信が必要
+			const config = await this.configController.getConfig();
+			this.messageClient.sendConfigUpdated(config);
+		}
 	}
 
 	/**

@@ -371,4 +371,138 @@ describe('useKanban', () => {
 			});
 		});
 	});
+
+	describe('Filter Paths', () => {
+		it('should filter tasks when filterPaths is set in config', async () => {
+			const { useKanban } = await import('./useVscodeApi');
+			const { result } = renderHook(() => useKanban());
+
+			const tasks = [
+				createMockTask({ id: '1', path: ['Project', 'Feature A'], status: 'todo' }),
+				createMockTask({ id: '2', path: ['Project', 'Feature B'], status: 'todo' }),
+				createMockTask({ id: '3', path: ['Project', 'Feature A'], status: 'done' }),
+			];
+
+			// First set tasks
+			act(() => {
+				simulateExtensionMessage({
+					type: 'TASKS_UPDATED',
+					payload: { tasks },
+				});
+			});
+
+			// Then set config with filterPaths
+			act(() => {
+				simulateExtensionMessage({
+					type: 'CONFIG_UPDATED',
+					payload: {
+						config: createMockConfig({
+							filterPaths: ['Project / Feature A'],
+						}),
+					},
+				});
+			});
+
+			await waitFor(() => {
+				// tasksByStatus should only contain tasks matching filterPaths
+				const allFilteredTasks = [
+					...result.current.tasksByStatus.todo,
+					...result.current.tasksByStatus['in-progress'],
+					...result.current.tasksByStatus.done,
+				];
+				expect(allFilteredTasks).toHaveLength(2);
+				expect(allFilteredTasks.every((t) => t.path.join(' / ') === 'Project / Feature A')).toBe(
+					true,
+				);
+			});
+		});
+
+		it('should show all tasks when filterPaths is empty', async () => {
+			const { useKanban } = await import('./useVscodeApi');
+			const { result } = renderHook(() => useKanban());
+
+			const tasks = [
+				createMockTask({ id: '1', path: ['Project', 'Feature A'], status: 'todo' }),
+				createMockTask({ id: '2', path: ['Project', 'Feature B'], status: 'todo' }),
+			];
+
+			act(() => {
+				simulateExtensionMessage({
+					type: 'TASKS_UPDATED',
+					payload: { tasks },
+				});
+			});
+
+			act(() => {
+				simulateExtensionMessage({
+					type: 'CONFIG_UPDATED',
+					payload: {
+						config: createMockConfig({
+							filterPaths: [],
+						}),
+					},
+				});
+			});
+
+			await waitFor(() => {
+				expect(result.current.tasksByStatus.todo).toHaveLength(2);
+			});
+		});
+
+		it('should update filtered tasks when filterPaths changes', async () => {
+			const { useKanban } = await import('./useVscodeApi');
+			const { result } = renderHook(() => useKanban());
+
+			const tasks = [
+				createMockTask({ id: '1', path: ['Project', 'Feature A'], status: 'todo' }),
+				createMockTask({ id: '2', path: ['Project', 'Feature B'], status: 'todo' }),
+			];
+
+			act(() => {
+				simulateExtensionMessage({
+					type: 'TASKS_UPDATED',
+					payload: { tasks },
+				});
+			});
+
+			// Initially show all
+			act(() => {
+				simulateExtensionMessage({
+					type: 'CONFIG_UPDATED',
+					payload: { config: createMockConfig({ filterPaths: [] }) },
+				});
+			});
+
+			await waitFor(() => {
+				expect(result.current.tasksByStatus.todo).toHaveLength(2);
+			});
+
+			// Now filter to Feature A only
+			act(() => {
+				simulateExtensionMessage({
+					type: 'CONFIG_UPDATED',
+					payload: { config: createMockConfig({ filterPaths: ['Project / Feature A'] }) },
+				});
+			});
+
+			await waitFor(() => {
+				expect(result.current.tasksByStatus.todo).toHaveLength(1);
+				expect(result.current.tasksByStatus.todo[0].path).toEqual(['Project', 'Feature A']);
+			});
+		});
+
+		it('should post UPDATE_CONFIG message when updateConfig is called', async () => {
+			const { useKanban } = await import('./useVscodeApi');
+			const { result } = renderHook(() => useKanban());
+
+			act(() => {
+				result.current.actions.updateConfig({ filterPaths: ['Project / Feature'] });
+			});
+
+			expect(getMockVsCodeApi().postMessage).toHaveBeenCalledWith({
+				type: 'UPDATE_CONFIG',
+				payload: { filterPaths: ['Project / Feature'] },
+			});
+		});
+	});
 });

@@ -22,7 +22,7 @@ export class FrontmatterConfigProvider implements ConfigProvider {
 	 * 設定を取得する
 	 */
 	async getConfig(): Promise<KanbanConfig> {
-		const frontmatterConfig = this.getFrontmatterConfig();
+		const frontmatterConfig = await this.getFrontmatterConfig();
 		const fallbackConfig = await this.getFallbackConfig();
 
 		return {
@@ -41,6 +41,10 @@ export class FrontmatterConfigProvider implements ConfigProvider {
 				frontmatterConfig?.syncCheckboxWithDone,
 				fallbackConfig.syncCheckboxWithDone,
 			),
+			filterPaths: this.resolveFilterPaths(
+				frontmatterConfig?.filterPaths,
+				fallbackConfig.filterPaths,
+			),
 		};
 	}
 
@@ -52,8 +56,8 @@ export class FrontmatterConfigProvider implements ConfigProvider {
 		return config[key];
 	}
 
-	private getFrontmatterConfig(): FrontmatterConfig | undefined {
-		const textResult = this.documentClient.getActiveDocumentText();
+	private async getFrontmatterConfig(): Promise<FrontmatterConfig | undefined> {
+		const textResult = await this.documentClient.getCurrentDocumentText();
 		if (textResult.isErr()) {
 			return undefined;
 		}
@@ -104,6 +108,17 @@ export class FrontmatterConfigProvider implements ConfigProvider {
 			validValues.includes(frontmatterValue as KanbanConfig['sortBy'])
 		) {
 			return frontmatterValue as KanbanConfig['sortBy'];
+		}
+		return fallbackValue;
+	}
+
+	private resolveFilterPaths(
+		frontmatterValue: string[] | undefined,
+		fallbackValue: string[],
+	): string[] {
+		// フロントマターに値があればそれを使用（空配列も有効な値として扱う）
+		if (Array.isArray(frontmatterValue)) {
+			return frontmatterValue;
 		}
 		return fallbackValue;
 	}
