@@ -204,6 +204,26 @@ export class KanbanPanelProvider {
 				payload: { tasks: result.value },
 			});
 		}
+
+		// 設定も更新（フロントマターの変更を反映）
+		await this.sendConfigUpdate();
+	}
+
+	/**
+	 * 設定更新をWebViewに送信
+	 */
+	private async sendConfigUpdate(): Promise<void> {
+		if (!this.panel) {
+			return;
+		}
+
+		const configController = this.container.getConfigController();
+		const config = await configController.getConfig();
+
+		this.panel.webview.postMessage({
+			type: 'CONFIG_UPDATED',
+			payload: { config },
+		});
 	}
 
 	/**

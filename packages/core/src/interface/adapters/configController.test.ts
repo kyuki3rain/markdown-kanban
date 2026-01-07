@@ -14,6 +14,7 @@ describe('ConfigController', () => {
 		defaultDoneStatus: 'done',
 		sortBy: 'markdown',
 		syncCheckboxWithDone: true,
+		filterPaths: [],
 	};
 
 	beforeEach(() => {

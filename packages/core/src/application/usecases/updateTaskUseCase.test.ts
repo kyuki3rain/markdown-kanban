@@ -26,6 +26,7 @@ describe('UpdateTaskUseCase', () => {
 		defaultDoneStatus: 'done',
 		sortBy: 'markdown',
 		syncCheckboxWithDone: true,
+		filterPaths: [],
 	};
 
 	const createMockConfigProvider = (overrides: Partial<ConfigProvider> = {}): ConfigProvider => ({

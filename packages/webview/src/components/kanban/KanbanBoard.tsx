@@ -16,6 +16,7 @@ import { Column } from './Column';
 import { FloatingActions } from './FloatingActions';
 import { TaskCardOverlay } from './TaskCard';
 import { TaskModal } from './TaskModal';
+import { Toolbar } from './Toolbar';
 
 interface ModalState {
 	isOpen: boolean;
@@ -132,6 +133,14 @@ export function KanbanBoard() {
 		[actions],
 	);
 
+	// フィルターパス変更
+	const handleFilterPathsChange = useCallback(
+		(filterPaths: string[]) => {
+			actions.updateConfig({ filterPaths });
+		},
+		[actions],
+	);
+
 	// ローディング表示
 	if (isLoading) {
 		return (
@@ -173,9 +182,13 @@ export function KanbanBoard() {
 	}
 
 	return (
-		<>
+		<div className="flex flex-col h-full">
+			{/* ツールバー */}
+			<Toolbar config={config} paths={paths} onFilterPathsChange={handleFilterPathsChange} />
+
+			{/* カンバンボード */}
 			<DndContext sensors={sensors} onDragStart={handleDragStart} onDragEnd={handleDragEnd}>
-				<div className="flex gap-4 p-4 h-full overflow-x-auto">
+				<div className="flex gap-4 p-4 flex-1 overflow-x-auto">
 					{config.statuses.map((status) => (
 						<Column
 							key={status}
@@ -212,6 +225,6 @@ export function KanbanBoard() {
 				onSave={actions.saveDocument}
 				onRevert={actions.revertDocument}
 			/>
-		</>
+		</div>
 	);
 }

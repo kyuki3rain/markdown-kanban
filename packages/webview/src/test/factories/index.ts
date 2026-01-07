@@ -62,6 +62,7 @@ export function createMockConfig(overrides: Partial<KanbanConfig> = {}): KanbanC
 		defaultDoneStatus: 'done',
 		sortBy: 'markdown',
 		syncCheckboxWithDone: true,
+		filterPaths: [],
 		...overrides,
 	};
 }

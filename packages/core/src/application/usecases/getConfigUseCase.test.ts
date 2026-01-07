@@ -28,6 +28,7 @@ describe('GetConfigUseCase', () => {
 				defaultDoneStatus: 'done',
 				sortBy: 'priority',
 				syncCheckboxWithDone: false,
+				filterPaths: [],
 			};
 
 			const configProvider = createMockConfigProvider({

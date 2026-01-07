@@ -30,6 +30,7 @@ export interface FrontmatterConfig {
 	defaultDoneStatus?: string;
 	sortBy?: string;
 	syncCheckboxWithDone?: boolean;
+	filterPaths?: string[];
 }
 
 /**
@@ -202,6 +203,9 @@ export class MarkdownTaskClient {
 			sortBy: typeof config.sortBy === 'string' ? config.sortBy : undefined,
 			syncCheckboxWithDone:
 				typeof config.syncCheckboxWithDone === 'boolean' ? config.syncCheckboxWithDone : undefined,
+			filterPaths: Array.isArray(config.filterPaths)
+				? config.filterPaths.filter((p): p is string => typeof p === 'string')
+				: undefined,
 		};
 	}
 

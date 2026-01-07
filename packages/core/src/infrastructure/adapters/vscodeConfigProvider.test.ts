@@ -36,6 +36,7 @@ describe('VscodeConfigProvider', () => {
 				defaultDoneStatus: 'done',
 				sortBy: 'priority',
 				syncCheckboxWithDone: false,
+				filterPaths: [],
 			});
 		});
 

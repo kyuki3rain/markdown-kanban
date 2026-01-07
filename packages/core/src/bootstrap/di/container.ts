@@ -7,6 +7,7 @@ import {
 	GetTasksUseCase,
 	RevertDocumentUseCase,
 	SaveDocumentUseCase,
+	UpdateConfigUseCase,
 	UpdateTaskUseCase,
 } from '../../application/usecases';
 import {
@@ -54,6 +55,7 @@ export class Container {
 	private deleteTaskUseCase!: DeleteTaskUseCase;
 	private changeTaskStatusUseCase!: ChangeTaskStatusUseCase;
 	private getConfigUseCase!: GetConfigUseCase;
+	private updateConfigUseCase!: UpdateConfigUseCase;
 	private saveDocumentUseCase!: SaveDocumentUseCase;
 	private revertDocumentUseCase!: RevertDocumentUseCase;
 
@@ -158,6 +160,12 @@ export class Container {
 		// GetConfigUseCase
 		this.getConfigUseCase = new GetConfigUseCase(this.frontmatterConfigProvider);
 
+		// UpdateConfigUseCase
+		this.updateConfigUseCase = new UpdateConfigUseCase(
+			this.remarkClient,
+			this.vscodeDocumentClient,
+		);
+
 		// SaveDocumentUseCase
 		this.saveDocumentUseCase = new SaveDocumentUseCase(this.vscodeDocumentService);
 
@@ -179,7 +187,7 @@ export class Container {
 		);
 
 		// ConfigController
-		this.configController = new ConfigController(this.getConfigUseCase);
+		this.configController = new ConfigController(this.getConfigUseCase, this.updateConfigUseCase);
 
 		// DocumentController
 		this.documentController = new DocumentController(

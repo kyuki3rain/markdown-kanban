@@ -31,6 +31,7 @@ export class VscodeConfigProvider implements ConfigProvider {
 				allSettings.syncCheckboxWithDone,
 				DEFAULT_CONFIG.syncCheckboxWithDone,
 			),
+			filterPaths: DEFAULT_CONFIG.filterPaths,
 		};
 	}
 

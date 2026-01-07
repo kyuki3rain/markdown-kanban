@@ -64,6 +64,7 @@ const createMockConfigProvider = (overrides: Partial<KanbanConfig> = {}): Config
 		defaultDoneStatus: 'done',
 		sortBy: 'markdown',
 		syncCheckboxWithDone: true,
+		filterPaths: [],
 		...overrides,
 	};
 	return {

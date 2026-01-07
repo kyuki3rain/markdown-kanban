@@ -21,9 +21,9 @@ const createMockMarkdownClient = (config?: ParseResult['config']): MarkdownTaskC
 
 const createMockDocumentClient = (text?: string): VscodeDocumentClient =>
 	({
-		getActiveDocumentText: vi
+		getCurrentDocumentText: vi
 			.fn()
-			.mockReturnValue(text !== undefined ? ok(text) : err(new DocumentNotFoundError())),
+			.mockResolvedValue(text !== undefined ? ok(text) : err(new DocumentNotFoundError())),
 	}) as unknown as VscodeDocumentClient;
 
 const createMockFallbackProvider = (config: KanbanConfig): ConfigProvider => ({
@@ -169,6 +169,7 @@ describe('FrontmatterConfigProvider', () => {
 				defaultDoneStatus: 'vscode-done',
 				sortBy: 'priority',
 				syncCheckboxWithDone: true,
+				filterPaths: [],
 			};
 			const markdownClient = createMockMarkdownClient(frontmatterConfig);
 			const documentClient = createMockDocumentClient(
@@ -204,6 +205,7 @@ describe('FrontmatterConfigProvider', () => {
 				defaultDoneStatus: 'vscode-completed',
 				sortBy: 'due',
 				syncCheckboxWithDone: false,
+				filterPaths: [],
 			};
 			const markdownClient = createMockMarkdownClient(frontmatterConfig);
 			const documentClient = createMockDocumentClient(

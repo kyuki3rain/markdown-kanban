@@ -7,4 +7,9 @@ export { GetConfigUseCase } from './getConfigUseCase';
 export { GetTasksUseCase } from './getTasksUseCase';
 export { RevertDocumentUseCase } from './revertDocumentUseCase';
 export { SaveDocumentUseCase } from './saveDocumentUseCase';
+export {
+	UpdateConfigError,
+	type UpdateConfigInput,
+	UpdateConfigUseCase,
+} from './updateConfigUseCase';
 export { type UpdateTaskInput, UpdateTaskUseCase } from './updateTaskUseCase';

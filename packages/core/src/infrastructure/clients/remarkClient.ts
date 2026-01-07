@@ -45,4 +45,30 @@ export class RemarkClient {
 		const frontmatter = original.slice(0, original.length - content.length);
 		return frontmatter.split('\n').length - 1;
 	}
+
+	/**
+	 * フロントマターを更新してMarkdownを返す
+	 */
+	updateFrontmatter(markdown: string, updates: Record<string, unknown>): string {
+		const { content, data } = matter(markdown);
+
+		// 既存のkanbanセクションを取得または作成
+		const kanban = (data.kanban as Record<string, unknown>) ?? {};
+
+		// updatesをkanbanセクションにマージ
+		const updatedKanban = { ...kanban, ...updates };
+
+		// undefinedの値を削除
+		for (const key of Object.keys(updatedKanban)) {
+			if (updatedKanban[key] === undefined) {
+				delete updatedKanban[key];
+			}
+		}
+
+		// 更新されたデータ
+		const updatedData = { ...data, kanban: updatedKanban };
+
+		// gray-matterのstringifyでフロントマターを再生成
+		return matter.stringify(content, updatedData);
+	}
 }

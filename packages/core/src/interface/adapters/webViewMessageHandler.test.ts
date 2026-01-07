@@ -4,6 +4,7 @@ import {
 	DocumentOperationError,
 	NoActiveDocumentError,
 } from '../../application/ports/documentService';
+import { UpdateConfigError } from '../../application/usecases';
 import { NoActiveEditorError } from '../../domain/errors/noActiveEditorError';
 import { TaskNotFoundError } from '../../domain/errors/taskNotFoundError';
 import { TaskParseError } from '../../domain/errors/taskParseError';
@@ -39,6 +40,7 @@ describe('WebViewMessageHandler', () => {
 		defaultDoneStatus: 'done',
 		sortBy: 'markdown',
 		syncCheckboxWithDone: true,
+		filterPaths: [],
 	};
 
 	beforeEach(() => {
@@ -53,6 +55,7 @@ describe('WebViewMessageHandler', () => {
 		mockConfigController = {
 			getConfig: vi.fn().mockResolvedValue(mockConfig),
 			get: vi.fn(),
+			updateConfig: vi.fn().mockResolvedValue(ok(undefined)),
 		} as unknown as ConfigController;
 
 		mockMessageClient = {
@@ -234,6 +237,62 @@ describe('WebViewMessageHandler', () => {
 
 				expect(mockConfigController.getConfig).toHaveBeenCalled();
 				expect(mockMessageClient.sendConfigUpdated).toHaveBeenCalledWith(mockConfig);
+			});
+		});
+
+		describe('UPDATE_CONFIG', () => {
+			it('設定を更新し、成功時はCONFIG_UPDATEDを送信する', async () => {
+				const updatedConfig = { ...mockConfig, filterPaths: ['Project / Feature'] };
+				vi.mocked(mockConfigController.getConfig).mockResolvedValue(updatedConfig);
+				const message: WebViewToExtensionMessage = {
+					type: 'UPDATE_CONFIG',
+					payload: {
+						filterPaths: ['Project / Feature'],
+					},
+				};
+
+				await handler.handleMessage(message);
+
+				expect(mockConfigController.updateConfig).toHaveBeenCalledWith({
+					filterPaths: ['Project / Feature'],
+				});
+				// 成功時はCONFIG_UPDATEDを送信する（WebViewにフォーカスがある場合、ドキュメント変更イベントが発火しないため）
+				expect(mockConfigController.getConfig).toHaveBeenCalled();
+				expect(mockMessageClient.sendConfigUpdated).toHaveBeenCalledWith(updatedConfig);
+			});
+
+			it('空のfilterPathsで設定を更新できる', async () => {
+				const message: WebViewToExtensionMessage = {
+					type: 'UPDATE_CONFIG',
+					payload: {
+						filterPaths: [],
+					},
+				};
+
+				await handler.handleMessage(message);
+
+				expect(mockConfigController.updateConfig).toHaveBeenCalledWith({
+					filterPaths: [],
+				});
+				expect(mockMessageClient.sendConfigUpdated).toHaveBeenCalled();
+			});
+
+			it('エラー時はエラーメッセージを送信する', async () => {
+				const error = new UpdateConfigError('設定の更新に失敗しました');
+				vi.mocked(mockConfigController.updateConfig).mockResolvedValue(err(error));
+				const message: WebViewToExtensionMessage = {
+					type: 'UPDATE_CONFIG',
+					payload: {
+						filterPaths: ['path'],
+					},
+				};
+
+				await handler.handleMessage(message);
+
+				expect(mockMessageClient.sendError).toHaveBeenCalledWith(
+					'設定の更新に失敗しました',
+					'UpdateConfigError',
+				);
 			});
 		});
 
