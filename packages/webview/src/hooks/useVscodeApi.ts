@@ -271,26 +271,37 @@ export function useKanban() {
 
 	// パス一覧を取得（ユニーク、全タスクから）
 	// 空文字列を split すると [''] になるため、空文字列の場合は空配列を返す
-	const allPaths = Array.from(new Set(state.tasks.map((task) => task.path.join(' / ')))).map(
-		(pathStr) => (pathStr === '' ? [] : pathStr.split(' / ')),
+	const allPaths = useMemo(
+		() =>
+			Array.from(new Set(state.tasks.map((task) => task.path.join(' / ')))).map((pathStr) =>
+				pathStr === '' ? [] : pathStr.split(' / '),
+			),
+		[state.tasks],
 	);
 
 	// フィルタリング（filterPathsが空の場合は全タスク表示）
-	const filteredTasks =
-		config.filterPaths.length === 0
-			? state.tasks
-			: state.tasks.filter((task) => {
-					const taskPathStr = task.path.join(' / ');
-					return config.filterPaths.some((filterPath) => taskPathStr === filterPath);
-				});
+	const filteredTasks = useMemo(
+		() =>
+			config.filterPaths.length === 0
+				? state.tasks
+				: state.tasks.filter((task) => {
+						const taskPathStr = task.path.join(' / ');
+						return config.filterPaths.some((filterPath) => taskPathStr === filterPath);
+					}),
+		[state.tasks, config.filterPaths],
+	);
 
 	// ステータスごとにタスクをグループ化（フィルタ後のタスク）
-	const tasksByStatus = config.statuses.reduce(
-		(acc, status) => {
-			acc[status] = filteredTasks.filter((task) => task.status === status);
-			return acc;
-		},
-		{} as Record<string, TaskDto[]>,
+	const tasksByStatus = useMemo(
+		() =>
+			config.statuses.reduce(
+				(acc, status) => {
+					acc[status] = filteredTasks.filter((task) => task.status === status);
+					return acc;
+				},
+				{} as Record<string, TaskDto[]>,
+			),
+		[filteredTasks, config.statuses],
 	);
 
 	return {
