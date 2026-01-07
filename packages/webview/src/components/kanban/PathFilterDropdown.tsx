@@ -1,6 +1,7 @@
 import { ChevronDown, Filter } from 'lucide-react';
-import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import { useCallback, useMemo, useState } from 'react';
 import { cn } from '../../lib/utils';
+import { Popover, PopoverContent, PopoverTrigger } from '../ui/popover';
 
 interface PathFilterDropdownProps {
 	paths: string[][];
@@ -67,7 +68,6 @@ export function PathFilterDropdown({
 	onSelectionChange,
 }: PathFilterDropdownProps) {
 	const [isOpen, setIsOpen] = useState(false);
-	const dropdownRef = useRef<HTMLDivElement>(null);
 
 	// パスツリーを構築
 	const pathTree = useMemo(() => buildPathTree(paths), [paths]);
@@ -75,40 +75,6 @@ export function PathFilterDropdown({
 
 	// 選択中のパスをSetで管理（高速検索用）
 	const selectedPathsSet = useMemo(() => new Set(selectedPaths), [selectedPaths]);
-
-	// ドロップダウン外クリックで閉じる
-	useEffect(() => {
-		const handleClickOutside = (event: MouseEvent) => {
-			if (dropdownRef.current && !dropdownRef.current.contains(event.target as Node)) {
-				setIsOpen(false);
-			}
-		};
-
-		if (isOpen) {
-			document.addEventListener('mousedown', handleClickOutside);
-		}
-
-		return () => {
-			document.removeEventListener('mousedown', handleClickOutside);
-		};
-	}, [isOpen]);
-
-	// Escapeで閉じる
-	useEffect(() => {
-		const handleKeyDown = (event: KeyboardEvent) => {
-			if (event.key === 'Escape') {
-				setIsOpen(false);
-			}
-		};
-
-		if (isOpen) {
-			document.addEventListener('keydown', handleKeyDown);
-		}
-
-		return () => {
-			document.removeEventListener('keydown', handleKeyDown);
-		};
-	}, [isOpen]);
 
 	// パスの選択/解除
 	const togglePath = useCallback(
@@ -138,92 +104,87 @@ export function PathFilterDropdown({
 	}, [selectedPaths]);
 
 	return (
-		<div ref={dropdownRef} className="relative">
-			<button
-				type="button"
-				onClick={() => setIsOpen(!isOpen)}
-				aria-expanded={isOpen}
-				aria-haspopup="listbox"
-				className={cn(
-					'flex items-center gap-2 px-3 py-1.5 rounded-md',
-					'text-sm font-medium',
-					'bg-secondary text-secondary-foreground',
-					'hover:bg-secondary/80 transition-colors',
-					'border border-border',
-				)}
-			>
-				<Filter className="h-4 w-4" />
-				<span>Filter: {label}</span>
-				<ChevronDown className={cn('h-4 w-4 transition-transform', isOpen && 'rotate-180')} />
-			</button>
-
-			{isOpen && (
-				<div
-					role="listbox"
+		<Popover open={isOpen} onOpenChange={setIsOpen}>
+			<PopoverTrigger asChild>
+				<button
+					type="button"
+					aria-expanded={isOpen}
+					aria-haspopup="listbox"
 					className={cn(
-						'absolute left-0 top-full mt-1 z-50',
-						'min-w-[200px] max-h-[300px] overflow-auto',
-						'bg-popover border border-border rounded-md shadow-lg',
+						'flex items-center gap-2 px-3 py-1.5 rounded-md',
+						'text-sm font-medium',
+						'bg-secondary text-secondary-foreground',
+						'hover:bg-secondary/80 transition-colors',
+						'border border-border',
+						'min-w-35',
 					)}
 				>
-					{/* すべて表示オプション */}
-					<button
-						type="button"
-						role="option"
-						aria-selected={selectedPaths.length === 0}
-						onClick={showAll}
-						className={cn(
-							'w-full flex items-center gap-2 px-3 py-2 text-left text-sm',
-							'hover:bg-muted transition-colors',
-							selectedPaths.length === 0 && 'bg-muted/50',
-						)}
-					>
-						<input
-							type="checkbox"
-							checked={selectedPaths.length === 0}
-							readOnly
-							className="h-4 w-4 rounded border-border"
-						/>
-						<span>Show All</span>
-					</button>
+					<Filter className="h-4 w-4 shrink-0" />
+					<span className="truncate">Filter: {label}</span>
+					<ChevronDown
+						className={cn('h-4 w-4 shrink-0 transition-transform', isOpen && 'rotate-180')}
+					/>
+				</button>
+			</PopoverTrigger>
 
-					{flatPaths.length > 0 && <div className="border-t border-border" />}
-
-					{/* パス一覧 */}
-					{flatPaths.map((node) => {
-						const pathStr = node.fullPath.join(' / ');
-						const isSelected = selectedPathsSet.has(pathStr);
-
-						return (
-							<button
-								key={pathStr}
-								type="button"
-								role="option"
-								aria-selected={isSelected}
-								onClick={() => togglePath(pathStr)}
-								className={cn(
-									'w-full flex items-center gap-2 px-3 py-2 text-left text-sm',
-									'hover:bg-muted transition-colors',
-									isSelected && 'bg-muted/50',
-								)}
-								style={{ paddingLeft: `${12 + node.depth * 16}px` }}
-							>
-								<input
-									type="checkbox"
-									checked={isSelected}
-									readOnly
-									className="h-4 w-4 rounded border-border"
-								/>
-								<span>{node.segment}</span>
-							</button>
-						);
-					})}
-
-					{flatPaths.length === 0 && (
-						<div className="px-3 py-2 text-sm text-muted-foreground">No paths available</div>
+			<PopoverContent align="start" className="w-70 max-h-75 overflow-auto p-0">
+				{/* すべて表示オプション */}
+				<button
+					type="button"
+					role="option"
+					aria-selected={selectedPaths.length === 0}
+					onClick={showAll}
+					className={cn(
+						'w-full flex items-center gap-2 px-3 py-2 text-left text-sm',
+						'hover:bg-muted transition-colors',
+						selectedPaths.length === 0 && 'bg-muted/50',
 					)}
-				</div>
-			)}
-		</div>
+				>
+					<input
+						type="checkbox"
+						checked={selectedPaths.length === 0}
+						readOnly
+						className="h-4 w-4 rounded border-border"
+					/>
+					<span>Show All</span>
+				</button>
+
+				{flatPaths.length > 0 && <div className="border-t border-border" />}
+
+				{/* パス一覧 */}
+				{flatPaths.map((node) => {
+					const pathStr = node.fullPath.join(' / ');
+					const isSelected = selectedPathsSet.has(pathStr);
+
+					return (
+						<button
+							key={pathStr}
+							type="button"
+							role="option"
+							aria-selected={isSelected}
+							onClick={() => togglePath(pathStr)}
+							className={cn(
+								'w-full flex items-center gap-2 px-3 py-2 text-left text-sm',
+								'hover:bg-muted transition-colors',
+								isSelected && 'bg-muted/50',
+							)}
+							style={{ paddingLeft: `${12 + node.depth * 16}px` }}
+						>
+							<input
+								type="checkbox"
+								checked={isSelected}
+								readOnly
+								className="h-4 w-4 rounded border-border"
+							/>
+							<span>{node.segment}</span>
+						</button>
+					);
+				})}
+
+				{flatPaths.length === 0 && (
+					<div className="px-3 py-2 text-sm text-muted-foreground">No paths available</div>
+				)}
+			</PopoverContent>
+		</Popover>
 	);
 }
