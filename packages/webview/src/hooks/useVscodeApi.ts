@@ -270,6 +270,7 @@ export function useKanban() {
 	const config = state.config ?? defaultConfig;
 
 	// パス一覧を取得（ユニーク、全タスクから）
+	// 空文字列を split すると [''] になるため、空文字列の場合は空配列を返す
 	const allPaths = Array.from(new Set(state.tasks.map((task) => task.path.join(' / ')))).map(
 		(pathStr) => (pathStr === '' ? [] : pathStr.split(' / ')),
 	);

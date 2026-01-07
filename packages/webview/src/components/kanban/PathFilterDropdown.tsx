@@ -144,7 +144,9 @@ export function PathFilterDropdown({
 						type="checkbox"
 						checked={selectedPaths.length === 0}
 						readOnly
-						className="h-4 w-4 rounded border-border"
+						tabIndex={-1}
+						aria-hidden="true"
+						className="h-4 w-4 rounded border-border pointer-events-none"
 					/>
 					<span>Show All</span>
 				</button>
@@ -174,7 +176,9 @@ export function PathFilterDropdown({
 								type="checkbox"
 								checked={isSelected}
 								readOnly
-								className="h-4 w-4 rounded border-border"
+								tabIndex={-1}
+								aria-hidden="true"
+								className="h-4 w-4 rounded border-border pointer-events-none"
 							/>
 							<span>{node.segment}</span>
 						</button>
