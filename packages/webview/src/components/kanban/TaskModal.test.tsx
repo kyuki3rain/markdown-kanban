@@ -198,6 +198,51 @@ describe('TaskModal', () => {
 				metadata: { priority: 'high' },
 			});
 		});
+
+		it('should preserve other metadata fields when updating priority', async () => {
+			const user = userEvent.setup();
+			const taskWithMultipleMetadata = createMockTask({
+				id: 'task-1',
+				title: 'Task with metadata',
+				status: 'todo',
+				path: [],
+				metadata: { priority: 'low', assignee: 'alice', due: '2026-01-15' },
+			});
+			render(<TaskModal {...defaultProps} task={taskWithMultipleMetadata} />);
+
+			await user.selectOptions(screen.getByLabelText('Priority'), 'high');
+			await user.click(screen.getByText('Update'));
+
+			expect(defaultProps.onSave).toHaveBeenCalledWith({
+				title: 'Task with metadata',
+				status: 'todo',
+				path: [],
+				metadata: { priority: 'high', assignee: 'alice', due: '2026-01-15' },
+			});
+		});
+
+		it('should preserve other metadata when clearing priority', async () => {
+			const user = userEvent.setup();
+			const taskWithMultipleMetadata = createMockTask({
+				id: 'task-1',
+				title: 'Task with metadata',
+				status: 'todo',
+				path: [],
+				metadata: { priority: 'high', assignee: 'bob' },
+			});
+			render(<TaskModal {...defaultProps} task={taskWithMultipleMetadata} />);
+
+			// Select None (empty string)
+			await user.selectOptions(screen.getByLabelText('Priority'), '');
+			await user.click(screen.getByText('Update'));
+
+			expect(defaultProps.onSave).toHaveBeenCalledWith({
+				title: 'Task with metadata',
+				status: 'todo',
+				path: [],
+				metadata: { assignee: 'bob' },
+			});
+		});
 	});
 
 	describe('Task Deletion', () => {

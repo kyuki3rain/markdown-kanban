@@ -85,9 +85,23 @@ export function TaskModal({
 		if (!title.trim()) return;
 
 		const path = selectedPath ? selectedPath.split(' / ') : [];
-		const metadata: TaskMetadata = {
-			...(priority ? { priority } : {}),
-		};
+
+		// メタデータを構築（編集時は既存メタデータを保持）
+		let metadata: TaskMetadata;
+		if (isEditMode && task) {
+			// 編集モード: 既存メタデータを保持しつつpriorityを更新/削除
+			const { priority: _existingPriority, ...restMetadata } = task.metadata;
+			metadata = {
+				...restMetadata,
+				...(priority ? { priority } : {}),
+			};
+		} else {
+			// 作成モード: priorityのみ
+			metadata = {
+				...(priority ? { priority } : {}),
+			};
+		}
+
 		onSave({
 			title: title.trim(),
 			status,

@@ -696,7 +696,8 @@ export class MarkdownTaskClient {
 	 * タスク行内の特定のメタデータ行のインデックスを見つける
 	 */
 	private findMetadataLineIndex(taskLines: string[], key: string): number {
-		const pattern = new RegExp(`^\\s*-\\s*${key}:\\s*.+?\\r?$`);
+		const escapeRegex = (str: string) => str.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+		const pattern = new RegExp(`^\\s*-\\s*${escapeRegex(key)}:\\s*.+?\\r?$`);
 		for (let i = 1; i < taskLines.length; i++) {
 			if (taskLines[i].match(pattern)) {
 				return i;
