@@ -8,7 +8,7 @@ import {
 	useSensors,
 } from '@dnd-kit/core';
 import { AlertCircle, Loader2, RefreshCw } from 'lucide-react';
-import { useCallback, useState } from 'react';
+import { useCallback, useEffect, useState } from 'react';
 import { useKanban } from '../../hooks/useVscodeApi';
 import { cn } from '../../lib/utils';
 import type { TaskDto, TaskMetadata } from '../../types';
@@ -45,6 +45,21 @@ export function KanbanBoard() {
 			},
 		}),
 	);
+
+	// キーボードショートカットによる保存（Ctrl+S / Cmd+S）
+	// モーダル表示中、ローディング中、エラー時は無視
+	useEffect(() => {
+		const handleKeyDown = (e: KeyboardEvent) => {
+			if (modal.isOpen || isLoading || error) return;
+
+			if ((e.ctrlKey || e.metaKey) && e.key === 's') {
+				e.preventDefault();
+				actions.saveDocument();
+			}
+		};
+		window.addEventListener('keydown', handleKeyDown);
+		return () => window.removeEventListener('keydown', handleKeyDown);
+	}, [actions, modal.isOpen, isLoading, error]);
 
 	// ドラッグ開始
 	const handleDragStart = useCallback((event: DragStartEvent) => {
