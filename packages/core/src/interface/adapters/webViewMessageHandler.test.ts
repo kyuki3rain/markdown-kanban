@@ -294,6 +294,48 @@ describe('WebViewMessageHandler', () => {
 					'UpdateConfigError',
 				);
 			});
+
+			it('sortByを更新し、成功時はCONFIG_UPDATEDを送信する', async () => {
+				const updatedConfig = { ...mockConfig, sortBy: 'priority' as const };
+				vi.mocked(mockConfigController.getConfig).mockResolvedValue(updatedConfig);
+				const message: WebViewToExtensionMessage = {
+					type: 'UPDATE_CONFIG',
+					payload: {
+						sortBy: 'priority',
+					},
+				};
+
+				await handler.handleMessage(message);
+
+				expect(mockConfigController.updateConfig).toHaveBeenCalledWith({
+					sortBy: 'priority',
+				});
+				expect(mockMessageClient.sendConfigUpdated).toHaveBeenCalledWith(updatedConfig);
+			});
+
+			it('filterPathsとsortByを同時に更新できる', async () => {
+				const updatedConfig = {
+					...mockConfig,
+					filterPaths: ['Project'],
+					sortBy: 'due' as const,
+				};
+				vi.mocked(mockConfigController.getConfig).mockResolvedValue(updatedConfig);
+				const message: WebViewToExtensionMessage = {
+					type: 'UPDATE_CONFIG',
+					payload: {
+						filterPaths: ['Project'],
+						sortBy: 'due',
+					},
+				};
+
+				await handler.handleMessage(message);
+
+				expect(mockConfigController.updateConfig).toHaveBeenCalledWith({
+					filterPaths: ['Project'],
+					sortBy: 'due',
+				});
+				expect(mockMessageClient.sendConfigUpdated).toHaveBeenCalledWith(updatedConfig);
+			});
 		});
 
 		describe('SAVE_DOCUMENT', () => {

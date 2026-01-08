@@ -100,6 +100,7 @@ export interface UpdateConfigRequest {
 	type: 'UPDATE_CONFIG';
 	payload: {
 		filterPaths?: string[];
+		sortBy?: 'markdown' | 'priority' | 'due' | 'alphabetical';
 	};
 }
 

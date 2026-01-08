@@ -260,7 +260,10 @@ export function useKanban() {
 	}, [postMessage]);
 
 	const updateConfig = useCallback(
-		(updates: { filterPaths?: string[] }) => {
+		(updates: {
+			filterPaths?: string[];
+			sortBy?: 'markdown' | 'priority' | 'due' | 'alphabetical';
+		}) => {
 			postMessage({ type: 'UPDATE_CONFIG', payload: updates });
 		},
 		[postMessage],
