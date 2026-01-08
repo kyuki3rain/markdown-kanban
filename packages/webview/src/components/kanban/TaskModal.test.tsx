@@ -44,6 +44,7 @@ describe('TaskModal', () => {
 				title: 'New Task Title',
 				status: 'in-progress',
 				path: [],
+				metadata: {},
 			});
 			expect(defaultProps.onClose).toHaveBeenCalled();
 		});
@@ -69,6 +70,39 @@ describe('TaskModal', () => {
 				title: 'Task with Path',
 				status: 'todo',
 				path: ['Project', 'Feature A'],
+				metadata: {},
+			});
+		});
+
+		it('should allow selecting a priority', async () => {
+			const user = userEvent.setup();
+			render(<TaskModal {...defaultProps} />);
+
+			await user.type(screen.getByLabelText('Title'), 'High Priority Task');
+			await user.selectOptions(screen.getByLabelText('Priority'), 'high');
+			await user.click(screen.getByText('Create'));
+
+			expect(defaultProps.onSave).toHaveBeenCalledWith({
+				title: 'High Priority Task',
+				status: 'todo',
+				path: [],
+				metadata: { priority: 'high' },
+			});
+		});
+
+		it('should not include priority in metadata when None is selected', async () => {
+			const user = userEvent.setup();
+			render(<TaskModal {...defaultProps} />);
+
+			await user.type(screen.getByLabelText('Title'), 'No Priority Task');
+			// Priority defaults to None (empty string)
+			await user.click(screen.getByText('Create'));
+
+			expect(defaultProps.onSave).toHaveBeenCalledWith({
+				title: 'No Priority Task',
+				status: 'todo',
+				path: [],
+				metadata: {},
 			});
 		});
 	});
@@ -101,6 +135,7 @@ describe('TaskModal', () => {
 				title: 'Updated Title',
 				status: 'todo',
 				path: ['Project', 'Feature A'],
+				metadata: {},
 			});
 		});
 
@@ -115,6 +150,97 @@ describe('TaskModal', () => {
 				title: 'Existing Task',
 				status: 'done',
 				path: ['Project', 'Feature A'],
+				metadata: {},
+			});
+		});
+
+		it('should pre-fill priority from existing task', async () => {
+			const user = userEvent.setup();
+			const taskWithPriority = createMockTask({
+				id: 'task-1',
+				title: 'Priority Task',
+				status: 'todo',
+				path: [],
+				metadata: { priority: 'medium' },
+			});
+			render(<TaskModal {...defaultProps} task={taskWithPriority} />);
+
+			expect(screen.getByLabelText('Priority')).toHaveValue('medium');
+
+			await user.click(screen.getByText('Update'));
+
+			expect(defaultProps.onSave).toHaveBeenCalledWith({
+				title: 'Priority Task',
+				status: 'todo',
+				path: [],
+				metadata: { priority: 'medium' },
+			});
+		});
+
+		it('should allow changing priority in edit mode', async () => {
+			const user = userEvent.setup();
+			const taskWithPriority = createMockTask({
+				id: 'task-1',
+				title: 'Priority Task',
+				status: 'todo',
+				path: [],
+				metadata: { priority: 'low' },
+			});
+			render(<TaskModal {...defaultProps} task={taskWithPriority} />);
+
+			await user.selectOptions(screen.getByLabelText('Priority'), 'high');
+			await user.click(screen.getByText('Update'));
+
+			expect(defaultProps.onSave).toHaveBeenCalledWith({
+				title: 'Priority Task',
+				status: 'todo',
+				path: [],
+				metadata: { priority: 'high' },
+			});
+		});
+
+		it('should preserve other metadata fields when updating priority', async () => {
+			const user = userEvent.setup();
+			const taskWithMultipleMetadata = createMockTask({
+				id: 'task-1',
+				title: 'Task with metadata',
+				status: 'todo',
+				path: [],
+				metadata: { priority: 'low', assignee: 'alice', due: '2026-01-15' },
+			});
+			render(<TaskModal {...defaultProps} task={taskWithMultipleMetadata} />);
+
+			await user.selectOptions(screen.getByLabelText('Priority'), 'high');
+			await user.click(screen.getByText('Update'));
+
+			expect(defaultProps.onSave).toHaveBeenCalledWith({
+				title: 'Task with metadata',
+				status: 'todo',
+				path: [],
+				metadata: { priority: 'high', assignee: 'alice', due: '2026-01-15' },
+			});
+		});
+
+		it('should preserve other metadata when clearing priority', async () => {
+			const user = userEvent.setup();
+			const taskWithMultipleMetadata = createMockTask({
+				id: 'task-1',
+				title: 'Task with metadata',
+				status: 'todo',
+				path: [],
+				metadata: { priority: 'high', assignee: 'bob' },
+			});
+			render(<TaskModal {...defaultProps} task={taskWithMultipleMetadata} />);
+
+			// Select None (empty string)
+			await user.selectOptions(screen.getByLabelText('Priority'), '');
+			await user.click(screen.getByText('Update'));
+
+			expect(defaultProps.onSave).toHaveBeenCalledWith({
+				title: 'Task with metadata',
+				status: 'todo',
+				path: [],
+				metadata: { assignee: 'bob' },
 			});
 		});
 	});
@@ -213,6 +339,7 @@ describe('TaskModal', () => {
 				title: 'Trimmed Title',
 				status: 'todo',
 				path: [],
+				metadata: {},
 			});
 		});
 

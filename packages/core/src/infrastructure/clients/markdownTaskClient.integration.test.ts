@@ -695,6 +695,110 @@ kanban:
 			});
 		});
 
+		describe('メタデータ変更', () => {
+			it('タスクにpriority メタデータを追加できる', () => {
+				const markdown = `- [ ] タスク1
+  - status: todo`;
+				const result = client.applyEdit(markdown, {
+					taskId: generateTaskId(Path.create([]), 'タスク1'),
+					newMetadata: { priority: 'high' },
+				});
+
+				expect(result.isOk()).toBe(true);
+				const updated = result._unsafeUnwrap();
+				expect(updated).toContain('priority: high');
+				expect(updated).toContain('status: todo');
+			});
+
+			it('タスクの既存メタデータを更新できる', () => {
+				const markdown = `- [ ] タスク1
+  - status: todo
+  - priority: low`;
+				const result = client.applyEdit(markdown, {
+					taskId: generateTaskId(Path.create([]), 'タスク1'),
+					newMetadata: { priority: 'high' },
+				});
+
+				expect(result.isOk()).toBe(true);
+				const updated = result._unsafeUnwrap();
+				expect(updated).toContain('priority: high');
+				expect(updated).not.toContain('priority: low');
+			});
+
+			it('メタデータを空にすると削除される', () => {
+				const markdown = `- [ ] タスク1
+  - status: todo
+  - priority: high`;
+				const result = client.applyEdit(markdown, {
+					taskId: generateTaskId(Path.create([]), 'タスク1'),
+					newMetadata: {},
+				});
+
+				expect(result.isOk()).toBe(true);
+				const updated = result._unsafeUnwrap();
+				expect(updated).not.toContain('priority:');
+				expect(updated).toContain('status: todo');
+			});
+
+			it('メタデータとステータスを同時に更新できる', () => {
+				const markdown = `- [ ] タスク1
+  - status: todo
+  - priority: low`;
+				const newStatus = Status.create('in-progress')._unsafeUnwrap();
+				const result = client.applyEdit(markdown, {
+					taskId: generateTaskId(Path.create([]), 'タスク1'),
+					newStatus,
+					newMetadata: { priority: 'high' },
+				});
+
+				expect(result.isOk()).toBe(true);
+				const updated = result._unsafeUnwrap();
+				expect(updated).toContain('status: in-progress');
+				expect(updated).toContain('priority: high');
+				expect(updated).not.toContain('priority: low');
+			});
+
+			it('メタデータ付きタスクをパス変更してもメタデータが更新される', () => {
+				const markdown = `# 仕事
+- [ ] タスク1
+  - status: todo
+  - priority: low
+
+# 個人`;
+				const result = client.applyEdit(markdown, {
+					taskId: generateTaskId(Path.create(['仕事']), 'タスク1'),
+					newPath: Path.create(['個人']),
+					newMetadata: { priority: 'high' },
+				});
+
+				expect(result.isOk()).toBe(true);
+				const updated = result._unsafeUnwrap();
+				expect(updated).toMatch(/# 個人[\s\S]*タスク1/);
+				expect(updated).toContain('priority: high');
+				expect(updated).not.toContain('priority: low');
+			});
+
+			it('statusがメタデータに含まれていても applyStatusChangeで処理されるため重複しない', () => {
+				const markdown = `- [ ] タスク1
+  - status: todo`;
+				const newStatus = Status.create('in-progress')._unsafeUnwrap();
+				const result = client.applyEdit(markdown, {
+					taskId: generateTaskId(Path.create([]), 'タスク1'),
+					newStatus,
+					newMetadata: { status: 'done', priority: 'high' },
+				});
+
+				expect(result.isOk()).toBe(true);
+				const updated = result._unsafeUnwrap();
+				// statusは applyStatusChange で処理されるため in-progress になる
+				expect(updated).toContain('status: in-progress');
+				expect(updated).toContain('priority: high');
+				// statusが2つ存在しないこと
+				const statusCount = (updated.match(/status:/g) || []).length;
+				expect(statusCount).toBe(1);
+			});
+		});
+
 		describe('パス変更', () => {
 			it('タスクのパスを変更できる（別の見出しに移動）', () => {
 				const markdown = `# 仕事
@@ -1194,6 +1298,64 @@ kanban:
 				});
 
 				expect(result.isErr()).toBe(true);
+			});
+
+			it('メタデータ付きでタスクを作成できる', () => {
+				const markdown = '';
+				const status = Status.create('todo')._unsafeUnwrap();
+				const result = client.applyEdit(markdown, {
+					create: {
+						title: '優先度付きタスク',
+						path: Path.create([]),
+						status,
+						metadata: { priority: 'high' },
+					},
+				});
+
+				expect(result.isOk()).toBe(true);
+				const updated = result._unsafeUnwrap();
+				expect(updated).toContain('[ ] 優先度付きタスク');
+				expect(updated).toContain('status: todo');
+				expect(updated).toContain('priority: high');
+			});
+
+			it('複数のメタデータ付きでタスクを作成できる', () => {
+				const markdown = '# プロジェクト';
+				const status = Status.create('in-progress')._unsafeUnwrap();
+				const result = client.applyEdit(markdown, {
+					create: {
+						title: '詳細タスク',
+						path: Path.create(['プロジェクト']),
+						status,
+						metadata: { priority: 'medium', assignee: 'alice' },
+					},
+				});
+
+				expect(result.isOk()).toBe(true);
+				const updated = result._unsafeUnwrap();
+				expect(updated).toContain('[ ] 詳細タスク');
+				expect(updated).toContain('status: in-progress');
+				expect(updated).toContain('priority: medium');
+				expect(updated).toContain('assignee: alice');
+			});
+
+			it('空のメタデータはスキップされる', () => {
+				const markdown = '';
+				const status = Status.create('todo')._unsafeUnwrap();
+				const result = client.applyEdit(markdown, {
+					create: {
+						title: 'シンプルタスク',
+						path: Path.create([]),
+						status,
+						metadata: { priority: '' },
+					},
+				});
+
+				expect(result.isOk()).toBe(true);
+				const updated = result._unsafeUnwrap();
+				expect(updated).toContain('[ ] シンプルタスク');
+				expect(updated).toContain('status: todo');
+				expect(updated).not.toContain('priority:');
 			});
 		});
 

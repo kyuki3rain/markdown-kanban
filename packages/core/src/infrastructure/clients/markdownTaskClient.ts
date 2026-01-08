@@ -61,6 +61,7 @@ export interface CreateTaskInfo {
 	title: string;
 	path: Path;
 	status: Status;
+	metadata?: TaskMetadata;
 }
 
 /**
@@ -75,6 +76,8 @@ export interface TaskEdit {
 	newTitle?: string;
 	/** 新しいパス（見出し階層） */
 	newPath?: Path;
+	/** 新しいメタデータ */
+	newMetadata?: TaskMetadata;
 	/** 削除フラグ */
 	delete?: boolean;
 	/** 新規作成情報 */
@@ -525,6 +528,7 @@ export class MarkdownTaskClient {
 		const taskLines = lines.slice(task.startLine - 1, task.endLine);
 		this.applyTitleChange(taskLines, edit.newTitle);
 		this.applyStatusChange(taskLines, edit.newStatus, edit.doneStatuses);
+		this.applyMetadataChange(taskLines, edit.newMetadata, task.metadata);
 
 		// 変更後の行で元の行を置き換え
 		lines.splice(task.startLine - 1, task.endLine - task.startLine + 1, ...taskLines);
@@ -558,6 +562,7 @@ export class MarkdownTaskClient {
 		// タスク行に変更を適用
 		this.applyTitleChange(taskLines, edit.newTitle);
 		this.applyStatusChange(taskLines, edit.newStatus, edit.doneStatuses);
+		this.applyMetadataChange(taskLines, edit.newMetadata, task.metadata);
 
 		// 元の場所からタスクを削除
 		const deleteCount = task.endLine - task.startLine + 1;
@@ -627,6 +632,74 @@ export class MarkdownTaskClient {
 	private findStatusLineIndex(taskLines: string[]): number {
 		for (let i = 1; i < taskLines.length; i++) {
 			if (taskLines[i].match(/^\s*-\s*status:\s*.+?\r?$/)) {
+				return i;
+			}
+		}
+		return -1;
+	}
+
+	/**
+	 * タスク行にメタデータ変更を適用する
+	 * status は applyStatusChange で処理するため除外
+	 */
+	private applyMetadataChange(
+		taskLines: string[],
+		newMetadata?: TaskMetadata,
+		oldMetadata?: TaskMetadata,
+	): void {
+		if (!newMetadata) return;
+
+		// status 以外のメタデータキーを処理
+		const metadataKeys = Object.keys(newMetadata).filter((key) => key !== 'status');
+		const oldMetadataKeys = oldMetadata
+			? Object.keys(oldMetadata).filter((key) => key !== 'status')
+			: [];
+
+		// 削除されたキーを特定
+		const deletedKeys = oldMetadataKeys.filter((key) => !(key in newMetadata));
+
+		// 削除されたキーの行を削除
+		for (const key of deletedKeys) {
+			const index = this.findMetadataLineIndex(taskLines, key);
+			if (index >= 0) {
+				taskLines.splice(index, 1);
+			}
+		}
+
+		// 新しい/更新されたメタデータを処理
+		for (const key of metadataKeys) {
+			const value = newMetadata[key];
+			if (value === undefined || value === null || value === '') {
+				// 空の値の場合は削除
+				const index = this.findMetadataLineIndex(taskLines, key);
+				if (index >= 0) {
+					taskLines.splice(index, 1);
+				}
+			} else {
+				// 値がある場合は更新または追加
+				const index = this.findMetadataLineIndex(taskLines, key);
+				const indent = taskLines.length > 1 ? (taskLines[1].match(/^(\s*)/)?.[1] ?? '  ') : '  ';
+
+				if (index >= 0) {
+					taskLines[index] = `${indent}- ${key}: ${value}`;
+				} else {
+					// 新しいメタデータを追加（statusの後、または最初の子リスト項目として）
+					const statusIndex = this.findStatusLineIndex(taskLines);
+					const insertIndex = statusIndex >= 0 ? statusIndex + 1 : 1;
+					taskLines.splice(insertIndex, 0, `${indent}- ${key}: ${value}`);
+				}
+			}
+		}
+	}
+
+	/**
+	 * タスク行内の特定のメタデータ行のインデックスを見つける
+	 */
+	private findMetadataLineIndex(taskLines: string[], key: string): number {
+		const escapeRegex = (str: string) => str.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+		const pattern = new RegExp(`^\\s*-\\s*${escapeRegex(key)}:\\s*.+?\\r?$`);
+		for (let i = 1; i < taskLines.length; i++) {
+			if (taskLines[i].match(pattern)) {
 				return i;
 			}
 		}
@@ -742,6 +815,15 @@ export class MarkdownTaskClient {
 
 		// タスク行を生成
 		const taskLines = [`- ${checkbox} ${create.title}`, `  - status: ${create.status.value}`];
+
+		// メタデータを追加（status以外）
+		if (create.metadata) {
+			for (const [key, value] of Object.entries(create.metadata)) {
+				if (key !== 'status' && value !== undefined && value !== null && value !== '') {
+					taskLines.push(`  - ${key}: ${value}`);
+				}
+			}
+		}
 
 		// 挿入位置を決定
 		let insertLine: number;

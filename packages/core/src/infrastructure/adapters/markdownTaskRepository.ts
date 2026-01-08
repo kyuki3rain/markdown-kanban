@@ -115,6 +115,7 @@ export class MarkdownTaskRepository implements TaskRepository {
 				newStatus: task.status,
 				newTitle: task.title !== existingTask.title ? task.title : undefined,
 				newPath: !task.path.equals(existingTask.path) ? task.path : undefined,
+				newMetadata: task.metadata,
 				doneStatuses,
 			});
 		} else {
@@ -124,6 +125,7 @@ export class MarkdownTaskRepository implements TaskRepository {
 					title: task.title,
 					path: task.path,
 					status: task.status,
+					metadata: task.metadata,
 				},
 				doneStatuses,
 			});
