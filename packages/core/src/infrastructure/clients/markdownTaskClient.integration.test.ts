@@ -1299,6 +1299,64 @@ kanban:
 
 				expect(result.isErr()).toBe(true);
 			});
+
+			it('メタデータ付きでタスクを作成できる', () => {
+				const markdown = '';
+				const status = Status.create('todo')._unsafeUnwrap();
+				const result = client.applyEdit(markdown, {
+					create: {
+						title: '優先度付きタスク',
+						path: Path.create([]),
+						status,
+						metadata: { priority: 'high' },
+					},
+				});
+
+				expect(result.isOk()).toBe(true);
+				const updated = result._unsafeUnwrap();
+				expect(updated).toContain('[ ] 優先度付きタスク');
+				expect(updated).toContain('status: todo');
+				expect(updated).toContain('priority: high');
+			});
+
+			it('複数のメタデータ付きでタスクを作成できる', () => {
+				const markdown = '# プロジェクト';
+				const status = Status.create('in-progress')._unsafeUnwrap();
+				const result = client.applyEdit(markdown, {
+					create: {
+						title: '詳細タスク',
+						path: Path.create(['プロジェクト']),
+						status,
+						metadata: { priority: 'medium', assignee: 'alice' },
+					},
+				});
+
+				expect(result.isOk()).toBe(true);
+				const updated = result._unsafeUnwrap();
+				expect(updated).toContain('[ ] 詳細タスク');
+				expect(updated).toContain('status: in-progress');
+				expect(updated).toContain('priority: medium');
+				expect(updated).toContain('assignee: alice');
+			});
+
+			it('空のメタデータはスキップされる', () => {
+				const markdown = '';
+				const status = Status.create('todo')._unsafeUnwrap();
+				const result = client.applyEdit(markdown, {
+					create: {
+						title: 'シンプルタスク',
+						path: Path.create([]),
+						status,
+						metadata: { priority: '' },
+					},
+				});
+
+				expect(result.isOk()).toBe(true);
+				const updated = result._unsafeUnwrap();
+				expect(updated).toContain('[ ] シンプルタスク');
+				expect(updated).toContain('status: todo');
+				expect(updated).not.toContain('priority:');
+			});
 		});
 
 		describe('エラーハンドリング', () => {

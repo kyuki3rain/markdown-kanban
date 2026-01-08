@@ -125,6 +125,7 @@ export class MarkdownTaskRepository implements TaskRepository {
 					title: task.title,
 					path: task.path,
 					status: task.status,
+					metadata: task.metadata,
 				},
 				doneStatuses,
 			});

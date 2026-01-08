@@ -61,6 +61,7 @@ export interface CreateTaskInfo {
 	title: string;
 	path: Path;
 	status: Status;
+	metadata?: TaskMetadata;
 }
 
 /**
@@ -813,6 +814,15 @@ export class MarkdownTaskClient {
 
 		// タスク行を生成
 		const taskLines = [`- ${checkbox} ${create.title}`, `  - status: ${create.status.value}`];
+
+		// メタデータを追加（status以外）
+		if (create.metadata) {
+			for (const [key, value] of Object.entries(create.metadata)) {
+				if (key !== 'status' && value !== undefined && value !== null && value !== '') {
+					taskLines.push(`  - ${key}: ${value}`);
+				}
+			}
+		}
 
 		// 挿入位置を決定
 		let insertLine: number;
