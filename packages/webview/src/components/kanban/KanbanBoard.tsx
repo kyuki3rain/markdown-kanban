@@ -141,6 +141,14 @@ export function KanbanBoard() {
 		[actions],
 	);
 
+	// ソート方式変更
+	const handleSortByChange = useCallback(
+		(sortBy: 'markdown' | 'priority' | 'due' | 'alphabetical') => {
+			actions.updateConfig({ sortBy });
+		},
+		[actions],
+	);
+
 	// ローディング表示
 	if (isLoading) {
 		return (
@@ -184,7 +192,12 @@ export function KanbanBoard() {
 	return (
 		<div className="flex flex-col h-full">
 			{/* ツールバー */}
-			<Toolbar config={config} paths={paths} onFilterPathsChange={handleFilterPathsChange} />
+			<Toolbar
+				config={config}
+				paths={paths}
+				onFilterPathsChange={handleFilterPathsChange}
+				onSortByChange={handleSortByChange}
+			/>
 
 			{/* カンバンボード */}
 			<DndContext sensors={sensors} onDragStart={handleDragStart} onDragEnd={handleDragEnd}>

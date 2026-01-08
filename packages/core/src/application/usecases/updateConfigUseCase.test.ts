@@ -90,6 +90,29 @@ kanban:
 			}
 		});
 
+		it('sortByの更新に成功した場合、フロントマターが更新される', async () => {
+			const result = await useCase.execute({ sortBy: 'priority' });
+
+			expect(result.isOk()).toBe(true);
+			expect(mockRemarkClient.updateFrontmatter).toHaveBeenCalledWith(mockMarkdown, {
+				sortBy: 'priority',
+			});
+			expect(mockDocumentClient.replaceDocumentText).toHaveBeenCalledWith(mockUpdatedMarkdown);
+		});
+
+		it('filterPathsとsortByを同時に更新できる', async () => {
+			const result = await useCase.execute({
+				filterPaths: ['Project / Feature'],
+				sortBy: 'due',
+			});
+
+			expect(result.isOk()).toBe(true);
+			expect(mockRemarkClient.updateFrontmatter).toHaveBeenCalledWith(mockMarkdown, {
+				filterPaths: ['Project / Feature'],
+				sortBy: 'due',
+			});
+		});
+
 		it('ドキュメントテキスト取得に失敗した場合、UpdateConfigErrorを返す', async () => {
 			const error = new NoActiveEditorError('No active document');
 			vi.mocked(mockDocumentClient.getCurrentDocumentText).mockResolvedValue(err(error));

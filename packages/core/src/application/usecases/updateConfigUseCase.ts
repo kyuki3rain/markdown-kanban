@@ -19,6 +19,7 @@ export class UpdateConfigError extends Error {
  */
 export interface UpdateConfigInput {
 	filterPaths?: string[];
+	sortBy?: 'markdown' | 'priority' | 'due' | 'alphabetical';
 }
 
 /**

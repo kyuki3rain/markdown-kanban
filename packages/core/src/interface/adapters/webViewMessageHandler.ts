@@ -155,7 +155,10 @@ export class WebViewMessageHandler {
 	 * 設定更新を処理する
 	 * 注: 成功時は設定を再取得して送信（WebViewにフォーカスがある場合、ドキュメント変更イベントが発火しないため）
 	 */
-	private async handleUpdateConfig(payload: { filterPaths?: string[] }): Promise<void> {
+	private async handleUpdateConfig(payload: {
+		filterPaths?: string[];
+		sortBy?: 'markdown' | 'priority' | 'due' | 'alphabetical';
+	}): Promise<void> {
 		const result = await this.configController.updateConfig(payload);
 
 		if (result.isErr()) {
