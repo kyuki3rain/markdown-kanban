@@ -3,6 +3,16 @@ import { useEffect, useRef, useState } from 'react';
 import { cn } from '../../lib/utils';
 import type { TaskDto, TaskMetadata } from '../../types';
 
+/**
+ * 優先度の選択肢
+ */
+const PRIORITY_OPTIONS = [
+	{ value: '', label: 'None' },
+	{ value: 'high', label: 'High' },
+	{ value: 'medium', label: 'Medium' },
+	{ value: 'low', label: 'Low' },
+] as const;
+
 interface TaskModalProps {
 	isOpen: boolean;
 	task?: TaskDto | null;
@@ -35,6 +45,7 @@ export function TaskModal({
 	const [title, setTitle] = useState('');
 	const [status, setStatus] = useState(defaultStatus ?? statuses[0] ?? 'todo');
 	const [selectedPath, setSelectedPath] = useState<string>('');
+	const [priority, setPriority] = useState<string>('');
 	const titleInputRef = useRef<HTMLInputElement>(null);
 
 	const isEditMode = !!task;
@@ -57,10 +68,12 @@ export function TaskModal({
 				setTitle(task.title);
 				setStatus(task.status);
 				setSelectedPath(task.path.join(' / '));
+				setPriority(task.metadata.priority ?? '');
 			} else {
 				setTitle('');
 				setStatus(defaultStatus ?? statuses[0] ?? 'todo');
 				setSelectedPath('');
+				setPriority('');
 			}
 			// フォーカス
 			setTimeout(() => titleInputRef.current?.focus(), 100);
@@ -72,10 +85,14 @@ export function TaskModal({
 		if (!title.trim()) return;
 
 		const path = selectedPath ? selectedPath.split(' / ') : [];
+		const metadata: TaskMetadata = {
+			...(priority ? { priority } : {}),
+		};
 		onSave({
 			title: title.trim(),
 			status,
 			path,
+			metadata,
 		});
 		onClose();
 	};
@@ -195,6 +212,30 @@ export function TaskModal({
 							)}
 						>
 							{pathOptions.map((opt) => (
+								<option key={opt.value} value={opt.value}>
+									{opt.label}
+								</option>
+							))}
+						</select>
+					</div>
+
+					{/* 優先度 */}
+					<div className="space-y-2">
+						<label htmlFor="priority" className="block text-sm font-medium text-foreground">
+							Priority
+						</label>
+						<select
+							id="priority"
+							value={priority}
+							onChange={(e) => setPriority(e.target.value)}
+							className={cn(
+								'w-full px-3 py-2 rounded-md',
+								'bg-background border border-input',
+								'text-foreground',
+								'focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent',
+							)}
+						>
+							{PRIORITY_OPTIONS.map((opt) => (
 								<option key={opt.value} value={opt.value}>
 									{opt.label}
 								</option>
