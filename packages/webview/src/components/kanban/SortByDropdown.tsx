@@ -58,7 +58,7 @@ export function SortByDropdown({ sortBy, onSortByChange }: SortByDropdownProps) 
 				</button>
 			</PopoverTrigger>
 
-			<PopoverContent align="end" className="w-50 p-0">
+			<PopoverContent align="end" className="w-50 p-0" role="listbox">
 				{SORT_OPTIONS.map((option) => (
 					<button
 						key={option.value}
