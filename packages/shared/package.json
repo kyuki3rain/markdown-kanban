@@ -1,0 +1,25 @@
+{
+	"name": "@md-tasks/shared",
+	"private": true,
+	"version": "0.0.1",
+	"type": "module",
+	"main": "./dist/index.js",
+	"types": "./dist/index.d.ts",
+	"exports": {
+		".": {
+			"types": "./dist/index.d.ts",
+			"import": "./dist/index.js"
+		}
+	},
+	"scripts": {
+		"build": "tsc",
+		"clean": "rm -rf dist",
+		"lint": "biome check src",
+		"lint:fix": "biome check --write src",
+		"format": "biome format --write src"
+	},
+	"devDependencies": {
+		"@biomejs/biome": "^2.3.10",
+		"typescript": "^5.9.3"
+	}
+}
