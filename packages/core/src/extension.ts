@@ -31,6 +31,23 @@ export function activate(context: vscode.ExtensionContext): void {
 	});
 	context.subscriptions.push(editorTitleCommand);
 
+	// コマンドを登録: ロック状態をトグル
+	const toggleLockCommand = vscode.commands.registerCommand('mdTasks.toggleKanbanLocking', () => {
+		logger.info('Toggling Kanban lock...');
+		kanbanPanelProvider?.toggleLock();
+	});
+	context.subscriptions.push(toggleLockCommand);
+
+	// コマンドを登録: ロック状態でカンバンボードを開く
+	const openLockedBoardCommand = vscode.commands.registerCommand(
+		'mdTasks.openLockedKanbanToSide',
+		() => {
+			logger.info('Opening locked Kanban board to side...');
+			kanbanPanelProvider?.showOrCreate(vscode.ViewColumn.Beside, true);
+		},
+	);
+	context.subscriptions.push(openLockedBoardCommand);
+
 	logger.info('MD Tasks extension activated successfully');
 }
 

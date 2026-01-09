@@ -41,6 +41,17 @@ vi.mock('vscode', () => ({
 			documentSaveCallback = callback;
 			return { dispose: vi.fn() };
 		}),
+		asRelativePath: vi.fn((uri) => {
+			if (typeof uri === 'string') return uri;
+			return uri?.path || uri?.toString() || 'No file';
+		}),
+		getConfiguration: vi.fn(() => ({
+			get: vi.fn((key: string, defaultValue: unknown) => {
+				// テストではデフォルトでアンロック状態にして既存の動作をテスト
+				if (key === 'defaultLocked') return false;
+				return defaultValue;
+			}),
+		})),
 	},
 	ViewColumn: {
 		Beside: 2,
@@ -98,7 +109,7 @@ describe('KanbanPanelProvider', () => {
 
 			expect(vscode.window.createWebviewPanel).toHaveBeenCalledWith(
 				'mdTasks.kanbanBoard',
-				'Kanban Board',
+				'Kanban: No file',
 				2, // ViewColumn.Beside
 				expect.any(Object),
 			);

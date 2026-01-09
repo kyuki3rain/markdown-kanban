@@ -14,6 +14,7 @@ export class KanbanPanelProvider {
 	private readonly extensionUri: vscode.Uri;
 	private readonly container: Container;
 	private disposables: vscode.Disposable[] = [];
+	private _locked = false;
 
 	constructor(extensionUri: vscode.Uri, container: Container) {
 		this.extensionUri = extensionUri;
@@ -32,12 +33,68 @@ export class KanbanPanelProvider {
 	}
 
 	/**
-	 * パネルを表示または作成する
+	 * ロック状態を取得
 	 */
-	public showOrCreate(viewColumn?: vscode.ViewColumn): void {
+	public get isLocked(): boolean {
+		return this._locked;
+	}
+
+	/**
+	 * ロック状態をトグル
+	 */
+	public toggleLock(): void {
+		if (!this.panel) {
+			return;
+		}
+
+		this._locked = !this._locked;
+		this.updatePanelTitle();
+		this.sendLockStateUpdate();
+		logger.info(`Kanban panel lock toggled: ${this._locked}`);
+	}
+
+	/**
+	 * パネルタイトルを更新
+	 */
+	private updatePanelTitle(): void {
+		if (!this.panel) {
+			return;
+		}
+
+		this.panel.title = this.getPanelTitle();
+	}
+
+	/**
+	 * ロック状態をWebViewに送信
+	 */
+	private sendLockStateUpdate(): void {
+		if (!this.panel) {
+			return;
+		}
+
+		this.panel.webview.postMessage({
+			type: 'LOCK_STATE_CHANGED',
+			payload: { isLocked: this._locked },
+		});
+		logger.debug(`Lock state updated: isLocked=${this._locked}`);
+	}
+
+	/**
+	 * パネルを表示または作成する
+	 * @param viewColumn 表示するカラム
+	 * @param locked ロック状態で開くかどうか（未指定の場合は設定から取得）
+	 */
+	public showOrCreate(viewColumn?: vscode.ViewColumn, locked?: boolean): void {
 		// 既存のパネルがある場合は表示
 		if (this.panel) {
 			this.panel.reveal(viewColumn);
+			// lockedが明示的に指定されている場合はロック状態を更新
+			if (locked !== undefined && this._locked !== locked) {
+				this._locked = locked;
+				this.updatePanelTitle();
+				this.sendLockStateUpdate();
+				logger.info(`Kanban panel lock updated: ${this._locked}`);
+			}
 			return;
 		}
 
@@ -45,10 +102,15 @@ export class KanbanPanelProvider {
 		// (createWebviewPanelの後はactiveTextEditorがundefinedになるため)
 		this.updateCurrentDocumentUri();
 
+		// ロック状態を設定（引数が未指定の場合は設定から取得）
+		const config = vscode.workspace.getConfiguration('mdTasks');
+		const defaultLocked = config.get<boolean>('defaultLocked', true);
+		this._locked = locked ?? defaultLocked;
+
 		// 新しいパネルを作成
 		this.panel = vscode.window.createWebviewPanel(
 			KanbanPanelProvider.viewType,
-			'Kanban Board',
+			this.getPanelTitle(),
 			viewColumn ?? vscode.ViewColumn.Beside,
 			this.getWebviewOptions(),
 		);
@@ -65,7 +127,17 @@ export class KanbanPanelProvider {
 		// パネルが閉じられた時の処理
 		this.panel.onDidDispose(() => this.dispose(), null, this.disposables);
 
-		logger.info('Kanban panel created');
+		logger.info(`Kanban panel created (locked: ${this._locked})`);
+	}
+
+	/**
+	 * パネルタイトルを取得
+	 */
+	private getPanelTitle(): string {
+		const currentUri = this.container.getVscodeDocumentClient().getCurrentDocumentUri();
+		const fileName = currentUri ? vscode.workspace.asRelativePath(currentUri, false) : 'No file';
+
+		return this._locked ? `[Kanban] ${fileName}` : `Kanban: ${fileName}`;
 	}
 
 	/**
@@ -127,6 +199,17 @@ export class KanbanPanelProvider {
 		this.panel.webview.onDidReceiveMessage(
 			async (message: WebViewToExtensionMessage) => {
 				logger.debug(`Received message from WebView: ${message.type}`);
+
+				// ロック関連のメッセージはここで処理
+				if (message.type === 'GET_LOCK_STATE') {
+					this.sendLockStateUpdate();
+					return;
+				}
+				if (message.type === 'TOGGLE_LOCK') {
+					this.toggleLock();
+					return;
+				}
+
 				await messageHandler.handleMessage(message);
 			},
 			null,
@@ -140,10 +223,17 @@ export class KanbanPanelProvider {
 	private setupDocumentWatcher(): void {
 		// アクティブエディタ変更時
 		const activeEditorChange = vscode.window.onDidChangeActiveTextEditor(async (editor) => {
+			// ロック状態の場合は、ファイル切り替えを行わない
+			if (this._locked) {
+				logger.debug('Kanban panel is locked, ignoring editor change');
+				return;
+			}
+
 			if (editor && this.isMarkdownDocument(editor.document)) {
 				// MarkdownファイルのURIを更新
 				this.container.getVscodeDocumentClient().setCurrentDocumentUri(editor.document.uri);
 				logger.debug(`Current document URI updated: ${editor.document.uri.toString()}`);
+				this.updatePanelTitle();
 				await this.sendTasksUpdate();
 				this.sendDocumentStateUpdate(editor.document);
 			}

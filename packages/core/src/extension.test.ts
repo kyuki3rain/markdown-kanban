@@ -6,6 +6,7 @@ let registeredCommands: Map<string, () => void> = new Map();
 // モックのKanbanPanelProvider
 const mockShowOrCreate = vi.fn();
 const mockDispose = vi.fn();
+const mockToggleLock = vi.fn();
 
 // bootstrapモジュールをモック（クラスコンストラクタとして正しく動作するように）
 vi.mock('./bootstrap', () => {
@@ -33,6 +34,9 @@ vi.mock('vscode', () => ({
 	},
 	window: {
 		activeTextEditor: undefined,
+	},
+	ViewColumn: {
+		Beside: 2,
 	},
 }));
 
@@ -67,6 +71,7 @@ describe('extension', () => {
 			return {
 				showOrCreate: mockShowOrCreate,
 				dispose: mockDispose,
+				toggleLock: mockToggleLock,
 			};
 		} as unknown as typeof bootstrap.KanbanPanelProvider);
 	});
@@ -110,7 +115,7 @@ describe('extension', () => {
 
 			extension.activate(mockContext as never);
 
-			expect(mockContext.subscriptions).toHaveLength(2);
+			expect(mockContext.subscriptions).toHaveLength(4);
 		});
 
 		it('openBoardコマンド実行時にshowOrCreateを呼び出す', async () => {
@@ -137,6 +142,57 @@ describe('extension', () => {
 			openBoardCallback?.();
 
 			expect(mockShowOrCreate).toHaveBeenCalled();
+		});
+
+		it('mdTasks.toggleKanbanLockingコマンドを登録する', async () => {
+			const vscode = await import('vscode');
+			const extension = await import('./extension');
+
+			extension.activate(mockContext as never);
+
+			expect(vscode.commands.registerCommand).toHaveBeenCalledWith(
+				'mdTasks.toggleKanbanLocking',
+				expect.any(Function),
+			);
+		});
+
+		it('toggleKanbanLockingコマンド実行時にtoggleLockを呼び出す', async () => {
+			const extension = await import('./extension');
+
+			extension.activate(mockContext as never);
+
+			const toggleLockCallback = registeredCommands.get('mdTasks.toggleKanbanLocking');
+			expect(toggleLockCallback).toBeDefined();
+
+			toggleLockCallback?.();
+
+			expect(mockToggleLock).toHaveBeenCalled();
+		});
+
+		it('mdTasks.openLockedKanbanToSideコマンドを登録する', async () => {
+			const vscode = await import('vscode');
+			const extension = await import('./extension');
+
+			extension.activate(mockContext as never);
+
+			expect(vscode.commands.registerCommand).toHaveBeenCalledWith(
+				'mdTasks.openLockedKanbanToSide',
+				expect.any(Function),
+			);
+		});
+
+		it('openLockedKanbanToSideコマンド実行時にshowOrCreateをロック状態で呼び出す', async () => {
+			const vscode = await import('vscode');
+			const extension = await import('./extension');
+
+			extension.activate(mockContext as never);
+
+			const openLockedCallback = registeredCommands.get('mdTasks.openLockedKanbanToSide');
+			expect(openLockedCallback).toBeDefined();
+
+			openLockedCallback?.();
+
+			expect(mockShowOrCreate).toHaveBeenCalledWith(vscode.ViewColumn.Beside, true);
 		});
 	});
 

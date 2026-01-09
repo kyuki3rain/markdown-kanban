@@ -105,6 +105,20 @@ export interface UpdateConfigRequest {
 }
 
 /**
+ * ロック状態取得リクエスト
+ */
+export interface GetLockStateRequest {
+	type: 'GET_LOCK_STATE';
+}
+
+/**
+ * ロック状態トグルリクエスト
+ */
+export interface ToggleLockRequest {
+	type: 'TOGGLE_LOCK';
+}
+
+/**
  * WebView → Extension の全メッセージタイプ
  */
 export type WebViewToExtensionMessage =
@@ -116,7 +130,9 @@ export type WebViewToExtensionMessage =
 	| GetConfigRequest
 	| SaveDocumentRequest
 	| RevertDocumentRequest
-	| UpdateConfigRequest;
+	| UpdateConfigRequest
+	| GetLockStateRequest
+	| ToggleLockRequest;
 
 // =============================================================================
 // Extension → WebView メッセージ
@@ -164,13 +180,24 @@ export interface DocumentStateChangedMessage {
 }
 
 /**
+ * ロック状態変更メッセージ
+ */
+export interface LockStateChangedMessage {
+	type: 'LOCK_STATE_CHANGED';
+	payload: {
+		isLocked: boolean;
+	};
+}
+
+/**
  * Extension → WebView の全メッセージタイプ
  */
 export type ExtensionToWebViewMessage =
 	| TasksUpdatedMessage
 	| ConfigUpdatedMessage
 	| ErrorMessage
-	| DocumentStateChangedMessage;
+	| DocumentStateChangedMessage
+	| LockStateChangedMessage;
 
 /**
  * 全メッセージタイプ
