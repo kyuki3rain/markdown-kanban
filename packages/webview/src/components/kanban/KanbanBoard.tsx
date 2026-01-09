@@ -28,7 +28,8 @@ interface ModalState {
  * カンバンボードコンポーネント
  */
 export function KanbanBoard() {
-	const { tasksByStatus, config, paths, isLoading, error, isDirty, actions } = useKanban();
+	const { tasksByStatus, config, paths, isLoading, error, isDirty, isLocked, actions } =
+		useKanban();
 
 	const [activeTask, setActiveTask] = useState<TaskDto | null>(null);
 	const [modal, setModal] = useState<ModalState>({
@@ -210,8 +211,10 @@ export function KanbanBoard() {
 			<Toolbar
 				config={config}
 				paths={paths}
+				isLocked={isLocked}
 				onFilterPathsChange={handleFilterPathsChange}
 				onSortByChange={handleSortByChange}
+				onToggleLock={actions.toggleLock}
 			/>
 
 			{/* カンバンボード */}

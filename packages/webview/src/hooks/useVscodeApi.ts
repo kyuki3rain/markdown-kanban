@@ -91,6 +91,7 @@ type MessageHandlers = {
 	CONFIG_UPDATED?: (payload: { config: KanbanConfig }) => void;
 	ERROR?: (payload: { message: string; code?: string }) => void;
 	DOCUMENT_STATE_CHANGED?: (payload: { isDirty: boolean }) => void;
+	LOCK_STATE_CHANGED?: (payload: { isLocked: boolean }) => void;
 };
 
 /**
@@ -132,6 +133,7 @@ interface KanbanState {
 	isLoading: boolean;
 	error: string | null;
 	isDirty: boolean;
+	isLocked: boolean;
 }
 
 const defaultConfig: KanbanConfig = {
@@ -155,6 +157,7 @@ export function useKanban() {
 		isLoading: true,
 		error: null,
 		isDirty: false,
+		isLocked: false,
 	});
 
 	// メッセージハンドラー
@@ -195,6 +198,12 @@ export function useKanban() {
 					isDirty: payload.isDirty,
 				}));
 			},
+			LOCK_STATE_CHANGED: (payload: { isLocked: boolean }) => {
+				setState((prev) => ({
+					...prev,
+					isLocked: payload.isLocked,
+				}));
+			},
 		}),
 		[],
 	);
@@ -205,6 +214,7 @@ export function useKanban() {
 	useEffect(() => {
 		postMessage({ type: 'GET_CONFIG' });
 		postMessage({ type: 'GET_TASKS' });
+		postMessage({ type: 'GET_LOCK_STATE' });
 	}, [postMessage]);
 
 	// アクション
@@ -269,6 +279,10 @@ export function useKanban() {
 		[postMessage],
 	);
 
+	const toggleLock = useCallback(() => {
+		postMessage({ type: 'TOGGLE_LOCK' });
+	}, [postMessage]);
+
 	// 設定を取得（なければデフォルト）
 	const config = state.config ?? defaultConfig;
 
@@ -315,6 +329,7 @@ export function useKanban() {
 		isLoading: state.isLoading,
 		error: state.error,
 		isDirty: state.isDirty,
+		isLocked: state.isLocked,
 		actions: {
 			createTask,
 			updateTask,
@@ -325,6 +340,7 @@ export function useKanban() {
 			saveDocument,
 			revertDocument,
 			updateConfig,
+			toggleLock,
 		},
 	};
 }

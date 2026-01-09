@@ -6,6 +6,7 @@ let registeredCommands: Map<string, () => void> = new Map();
 // モックのKanbanPanelProvider
 const mockShowOrCreate = vi.fn();
 const mockDispose = vi.fn();
+const mockToggleLock = vi.fn();
 
 // bootstrapモジュールをモック（クラスコンストラクタとして正しく動作するように）
 vi.mock('./bootstrap', () => {
@@ -67,6 +68,7 @@ describe('extension', () => {
 			return {
 				showOrCreate: mockShowOrCreate,
 				dispose: mockDispose,
+				toggleLock: mockToggleLock,
 			};
 		} as unknown as typeof bootstrap.KanbanPanelProvider);
 	});
@@ -110,7 +112,7 @@ describe('extension', () => {
 
 			extension.activate(mockContext as never);
 
-			expect(mockContext.subscriptions).toHaveLength(2);
+			expect(mockContext.subscriptions).toHaveLength(4);
 		});
 
 		it('openBoardコマンド実行時にshowOrCreateを呼び出す', async () => {
