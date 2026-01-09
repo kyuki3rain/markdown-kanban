@@ -4,6 +4,7 @@ import type { TaskMetadata } from '../../domain/entities/task';
 import { Path } from '../../domain/valueObjects/path';
 import { Status } from '../../domain/valueObjects/status';
 import { generateTaskId } from '../../domain/valueObjects/taskId';
+import { detectEol, joinLines, splitLines } from '../../shared/eol';
 import { RemarkClient } from '../clients/remarkClient';
 
 /**
@@ -522,7 +523,8 @@ export class MarkdownTaskClient {
 			return this.moveTask(markdown, task, edit);
 		}
 
-		const lines = markdown.split('\n');
+		const eolInfo = detectEol(markdown);
+		const lines = splitLines(markdown);
 
 		// タスク行を取得して変更を適用
 		const taskLines = lines.slice(task.startLine - 1, task.endLine);
@@ -533,7 +535,7 @@ export class MarkdownTaskClient {
 		// 変更後の行で元の行を置き換え
 		lines.splice(task.startLine - 1, task.endLine - task.startLine + 1, ...taskLines);
 
-		return ok(lines.join('\n'));
+		return ok(joinLines(lines, eolInfo));
 	}
 
 	/**
@@ -555,8 +557,10 @@ export class MarkdownTaskClient {
 			return err(validationResult.error);
 		}
 
+		const eolInfo = detectEol(markdown);
+
 		// タスクの元のテキストを取得（メタデータを含む全行）
-		const lines = markdown.split('\n');
+		const lines = splitLines(markdown);
 		const taskLines = lines.slice(task.startLine - 1, task.endLine);
 
 		// タスク行に変更を適用
@@ -569,17 +573,17 @@ export class MarkdownTaskClient {
 		lines.splice(task.startLine - 1, deleteCount);
 
 		// 削除後のMarkdownを再パースして挿入位置を決定
-		const deletedMarkdown = lines.join('\n');
+		const deletedMarkdown = joinLines(lines, eolInfo);
 		const insertLineResult = this.findInsertLineForNewPath(deletedMarkdown, newPath);
 		if (insertLineResult.isErr()) {
 			return err(insertLineResult.error);
 		}
 
 		// 新しい場所にタスクを挿入
-		const remainingLines = deletedMarkdown.split('\n');
+		const remainingLines = splitLines(deletedMarkdown);
 		remainingLines.splice(insertLineResult.value, 0, ...taskLines);
 
-		return ok(remainingLines.join('\n'));
+		return ok(joinLines(remainingLines, eolInfo));
 	}
 
 	/**
@@ -627,11 +631,10 @@ export class MarkdownTaskClient {
 
 	/**
 	 * タスク行内のステータス行のインデックスを見つける
-	 * 注: Windows環境でCRLF改行の場合、split('\n')後に\rが残るため\r?で対応
 	 */
 	private findStatusLineIndex(taskLines: string[]): number {
 		for (let i = 1; i < taskLines.length; i++) {
-			if (taskLines[i].match(/^\s*-\s*status:\s*.+?\r?$/)) {
+			if (taskLines[i].match(/^\s*-\s*status:\s*.+$/)) {
 				return i;
 			}
 		}
@@ -697,7 +700,7 @@ export class MarkdownTaskClient {
 	 */
 	private findMetadataLineIndex(taskLines: string[], key: string): number {
 		const escapeRegex = (str: string) => str.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
-		const pattern = new RegExp(`^\\s*-\\s*${escapeRegex(key)}:\\s*.+?\\r?$`);
+		const pattern = new RegExp(`^\\s*-\\s*${escapeRegex(key)}:\\s*.+$`);
 		for (let i = 1; i < taskLines.length; i++) {
 			if (taskLines[i].match(pattern)) {
 				return i;
@@ -741,7 +744,7 @@ export class MarkdownTaskClient {
 		}
 
 		const { tasks, headings } = parseResult.value;
-		const lines = markdown.split('\n');
+		const lines = splitLines(markdown);
 
 		if (targetPath.isRoot()) {
 			return ok(this.findInsertLineForRoot(lines, tasks));
@@ -784,13 +787,14 @@ export class MarkdownTaskClient {
 	 * タスクを削除する
 	 */
 	private deleteTask(markdown: string, task: ParsedTask): Result<string, SerializerError> {
-		const lines = markdown.split('\n');
+		const eolInfo = detectEol(markdown);
+		const lines = splitLines(markdown);
 
 		// タスク行と子要素を削除
 		const deleteCount = task.endLine - task.startLine + 1;
 		lines.splice(task.startLine - 1, deleteCount);
 
-		return ok(lines.join('\n'));
+		return ok(joinLines(lines, eolInfo));
 	}
 
 	/**
@@ -806,8 +810,9 @@ export class MarkdownTaskClient {
 			return err(new SerializerError('Markdownのパースに失敗しました'));
 		}
 
+		const eolInfo = detectEol(markdown);
 		const { tasks, headings } = parseResult.value;
-		const lines = markdown.split('\n');
+		const lines = splitLines(markdown);
 
 		// チェックボックスの状態を決定
 		const isDone = doneStatuses?.includes(create.status.value) ?? false;
@@ -867,7 +872,7 @@ export class MarkdownTaskClient {
 		// 行を挿入
 		lines.splice(insertLine, 0, ...taskLines);
 
-		return ok(lines.join('\n'));
+		return ok(joinLines(lines, eolInfo));
 	}
 
 	/**

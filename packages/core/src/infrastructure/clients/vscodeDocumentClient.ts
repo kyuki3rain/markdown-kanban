@@ -1,5 +1,6 @@
 import { err, ok, type Result } from 'neverthrow';
 import type * as vscode from 'vscode';
+import { splitLines } from '../../shared/eol';
 
 /**
  * ドキュメントが見つからないエラー
@@ -170,7 +171,7 @@ export class VscodeDocumentClient {
 			const document = await this.deps.openTextDocument(uri);
 			const lineCount = document.lineCount;
 			const lastLine = lineCount > 0 ? lineCount - 1 : 0;
-			const lastLineText = document.getText().split('\n')[lastLine] ?? '';
+			const lastLineText = splitLines(document.getText())[lastLine] ?? '';
 
 			const edit = this.deps.createWorkspaceEdit();
 			const fullRange = this.deps.createRange(0, 0, lastLine, lastLineText.length);
@@ -265,7 +266,7 @@ export class VscodeDocumentClient {
 
 			// 現在のドキュメントの内容を取得して範囲を計算
 			const currentText = document.getText();
-			const currentLines = currentText.length > 0 ? currentText.split(/\r?\n/) : [''];
+			const currentLines = splitLines(currentText);
 			const lastLineIndex = Math.max(currentLines.length - 1, 0);
 			const lastLineLength = currentLines[lastLineIndex]?.length ?? 0;
 
