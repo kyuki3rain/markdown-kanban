@@ -1,10 +1,9 @@
+import type { TaskMetadata } from '@md-tasks/shared';
+
 import type { Path } from '../valueObjects/path';
 import type { Status } from '../valueObjects/status';
 
-/**
- * タスクのメタデータ
- */
-export type TaskMetadata = Record<string, string>;
+export type { TaskMetadata };
 
 /**
  * タスク作成時のプロパティ

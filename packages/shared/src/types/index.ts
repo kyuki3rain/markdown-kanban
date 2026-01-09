@@ -1,7 +1,5 @@
-/**
- * WebView側のメッセージ型定義
- * @md-tasks/sharedから再エクスポート
- */
+export type { KanbanConfig, SortBy } from './config';
+export { DEFAULT_CONFIG } from './config';
 export type {
 	ChangeTaskStatusRequest,
 	ConfigUpdatedMessage,
@@ -14,20 +12,17 @@ export type {
 	GetLockStateRequest,
 	// WebView → Extension
 	GetTasksRequest,
-	KanbanConfig,
 	LockStateChangedMessage,
 	// Combined
 	Message,
 	MessageType,
 	RevertDocumentRequest,
 	SaveDocumentRequest,
-	SortBy,
-	TaskDto,
-	TaskMetadata,
 	// Extension → WebView
 	TasksUpdatedMessage,
 	ToggleLockRequest,
 	UpdateConfigRequest,
 	UpdateTaskRequest,
 	WebViewToExtensionMessage,
-} from '@md-tasks/shared';
+} from './messages';
+export type { TaskDto, TaskMetadata } from './task';
