@@ -88,6 +88,13 @@ export class KanbanPanelProvider {
 		// 既存のパネルがある場合は表示
 		if (this.panel) {
 			this.panel.reveal(viewColumn);
+			// lockedが明示的に指定されている場合はロック状態を更新
+			if (locked !== undefined && this._locked !== locked) {
+				this._locked = locked;
+				this.updatePanelTitle();
+				this.sendLockStateUpdate();
+				logger.info(`Kanban panel lock updated: ${this._locked}`);
+			}
 			return;
 		}
 

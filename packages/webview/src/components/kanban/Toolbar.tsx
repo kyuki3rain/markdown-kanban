@@ -15,7 +15,7 @@ interface ToolbarProps {
 
 /**
  * ツールバーコンポーネント
- * フィルター、ソートなどの操作を提供する
+ * フィルター、ソート、ロック状態の切り替えなどの操作を提供する
  */
 export function Toolbar({
 	config,
@@ -47,6 +47,7 @@ export function Toolbar({
 							: 'text-muted-foreground hover:text-foreground hover:bg-muted',
 					)}
 					title={isLocked ? 'Unlock panel (follow active editor)' : 'Lock panel to current file'}
+					aria-label={isLocked ? 'Unlock panel (follow active editor)' : 'Lock panel to current file'}
 				>
 					{isLocked ? <Lock className="h-4 w-4" /> : <Unlock className="h-4 w-4" />}
 					<span className="hidden sm:inline">{isLocked ? 'Locked' : 'Unlocked'}</span>
