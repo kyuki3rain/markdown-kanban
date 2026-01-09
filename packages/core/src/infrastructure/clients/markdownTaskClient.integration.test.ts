@@ -1380,5 +1380,110 @@ kanban:
 				expect(result.isErr()).toBe(true);
 			});
 		});
+
+		describe('CRLF改行コードの保持', () => {
+			it('ステータス更新時にCRLF改行コードが保持される', () => {
+				const markdown = '- [ ] タスク1\r\n  - status: todo\r\n  - priority: high';
+				const newStatus = Status.create('in-progress')._unsafeUnwrap();
+				const result = client.applyEdit(markdown, {
+					taskId: generateTaskId(Path.create([]), 'タスク1'),
+					newStatus,
+				});
+
+				expect(result.isOk()).toBe(true);
+				const updated = result._unsafeUnwrap();
+				// CRLFが保持されている
+				expect(updated).toContain('\r\n');
+				// LFのみの改行がない（CRLFに変換されていない）
+				expect(updated.split('\r\n').join('')).not.toContain('\n');
+			});
+
+			it('タスク移動時にCRLF改行コードが保持される', () => {
+				const markdown = '# 仕事\r\n- [ ] タスク1\r\n\r\n# 個人';
+				const result = client.applyEdit(markdown, {
+					taskId: generateTaskId(Path.create(['仕事']), 'タスク1'),
+					newPath: Path.create(['個人']),
+				});
+
+				expect(result.isOk()).toBe(true);
+				const updated = result._unsafeUnwrap();
+				expect(updated).toContain('\r\n');
+				expect(updated).toMatch(/# 個人[\s\S]*タスク1/);
+			});
+
+			it('タスク作成時に既存のCRLF改行コードが保持される', () => {
+				const markdown = '# 仕事\r\n- [ ] 既存タスク';
+				const status = Status.create('todo')._unsafeUnwrap();
+				const result = client.applyEdit(markdown, {
+					create: {
+						title: '新しいタスク',
+						path: Path.create(['仕事']),
+						status,
+					},
+				});
+
+				expect(result.isOk()).toBe(true);
+				const updated = result._unsafeUnwrap();
+				expect(updated).toContain('\r\n');
+				expect(updated).toContain('新しいタスク');
+			});
+
+			it('タスク削除時にCRLF改行コードが保持される', () => {
+				const markdown = '- [ ] タスク1\r\n- [ ] タスク2\r\n- [ ] タスク3';
+				const result = client.applyEdit(markdown, {
+					taskId: generateTaskId(Path.create([]), 'タスク2'),
+					delete: true,
+				});
+
+				expect(result.isOk()).toBe(true);
+				const updated = result._unsafeUnwrap();
+				expect(updated).toContain('\r\n');
+				expect(updated).not.toContain('タスク2');
+				expect(updated).toContain('タスク1');
+				expect(updated).toContain('タスク3');
+			});
+
+			it('LF改行コードのファイルはLFのまま保持される', () => {
+				const markdown = '- [ ] タスク1\n  - status: todo';
+				const newStatus = Status.create('done')._unsafeUnwrap();
+				const result = client.applyEdit(markdown, {
+					taskId: generateTaskId(Path.create([]), 'タスク1'),
+					newStatus,
+					doneStatuses: ['done'],
+				});
+
+				expect(result.isOk()).toBe(true);
+				const updated = result._unsafeUnwrap();
+				// CRLFが含まれていない
+				expect(updated).not.toContain('\r\n');
+				// LFが使われている
+				expect(updated).toContain('\n');
+			});
+
+			it('メタデータ変更時にCRLF改行コードが保持される', () => {
+				const markdown = '- [ ] タスク1\r\n  - status: todo\r\n  - priority: low';
+				const result = client.applyEdit(markdown, {
+					taskId: generateTaskId(Path.create([]), 'タスク1'),
+					newMetadata: { priority: 'high' },
+				});
+
+				expect(result.isOk()).toBe(true);
+				const updated = result._unsafeUnwrap();
+				expect(updated).toContain('\r\n');
+				expect(updated).toContain('priority: high');
+			});
+
+			it('フロントマター付きCRLFファイルでパースが正しく動作する', () => {
+				const markdown =
+					'---\r\nkanban:\r\n  statuses: [todo, done]\r\n---\r\n\r\n- [ ] タスク1\r\n  - status: todo';
+				const parseResult = client.parse(markdown);
+
+				expect(parseResult.isOk()).toBe(true);
+				const { tasks, config } = parseResult._unsafeUnwrap();
+				expect(tasks).toHaveLength(1);
+				expect(tasks[0].title).toBe('タスク1');
+				expect(config?.statuses).toContain('todo');
+			});
+		});
 	});
 });

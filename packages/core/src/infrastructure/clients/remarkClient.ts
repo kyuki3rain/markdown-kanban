@@ -2,6 +2,7 @@ import matter from 'gray-matter';
 import type { Root } from 'mdast';
 import { remark } from 'remark';
 import remarkGfm from 'remark-gfm';
+import { splitLines } from '../../shared/eol';
 
 /**
  * フロントマター抽出結果
@@ -43,7 +44,7 @@ export class RemarkClient {
 			return 0;
 		}
 		const frontmatter = original.slice(0, original.length - content.length);
-		return frontmatter.split('\n').length - 1;
+		return splitLines(frontmatter).length - 1;
 	}
 
 	/**
