@@ -1,5 +1,8 @@
 // Infrastructure Clients
 
+// Separated classes for fine-grained testing
+export { MarkdownParser } from './markdownParser';
+export { MarkdownSerializer } from './markdownSerializer';
 export {
 	type CreateTaskInfo,
 	type FrontmatterConfig,
@@ -10,12 +13,8 @@ export {
 	SerializerError,
 	type TaskEdit,
 } from './markdownTaskClient';
-
-// Separated classes for fine-grained testing
-export { MarkdownParser } from './markdownParser';
-export { MarkdownSerializer } from './markdownSerializer';
-export { TaskLineEditor } from './taskLineEditor';
 export { type FrontmatterResult, RemarkClient } from './remarkClient';
+export { TaskLineEditor } from './taskLineEditor';
 export { VscodeConfigClient, type VscodeConfigDeps } from './vscodeConfigClient';
 export {
 	DocumentEditError,

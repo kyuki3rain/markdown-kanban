@@ -100,7 +100,11 @@ export class MarkdownSerializer {
 	/**
 	 * タスクを更新する（その場で更新）
 	 */
-	private updateTask(markdown: string, task: ParsedTask, edit: TaskEdit): Result<string, SerializerError> {
+	private updateTask(
+		markdown: string,
+		task: ParsedTask,
+		edit: TaskEdit,
+	): Result<string, SerializerError> {
 		// パス変更がある場合は移動処理に委譲
 		if (edit.newPath && !edit.newPath.equals(task.path)) {
 			return this.moveTask(markdown, task, edit);
@@ -124,7 +128,11 @@ export class MarkdownSerializer {
 	/**
 	 * タスクを別のパスに移動する
 	 */
-	private moveTask(markdown: string, task: ParsedTask, edit: TaskEdit): Result<string, SerializerError> {
+	private moveTask(
+		markdown: string,
+		task: ParsedTask,
+		edit: TaskEdit,
+	): Result<string, SerializerError> {
 		const newPath = edit.newPath;
 		if (!newPath) {
 			return err(new SerializerError('移動先パスが指定されていません'));
@@ -282,7 +290,10 @@ export class MarkdownSerializer {
 	/**
 	 * 新しいパスへの挿入位置を決定する
 	 */
-	private findInsertLineForNewPath(markdown: string, targetPath: Path): Result<number, SerializerError> {
+	private findInsertLineForNewPath(
+		markdown: string,
+		targetPath: Path,
+	): Result<number, SerializerError> {
 		const parseResult = this.parser.parse(markdown);
 		if (parseResult.isErr()) {
 			return err(new SerializerError('Markdownのパースに失敗しました'));

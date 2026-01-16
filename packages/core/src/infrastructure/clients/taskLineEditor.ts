@@ -49,12 +49,18 @@ export class TaskLineEditor {
 	 * タスク行にメタデータ変更を適用する
 	 * status は applyStatusChange で処理するため除外
 	 */
-	applyMetadataChange(taskLines: string[], newMetadata?: TaskMetadata, oldMetadata?: TaskMetadata): void {
+	applyMetadataChange(
+		taskLines: string[],
+		newMetadata?: TaskMetadata,
+		oldMetadata?: TaskMetadata,
+	): void {
 		if (!newMetadata) return;
 
 		// status 以外のメタデータキーを処理
 		const metadataKeys = Object.keys(newMetadata).filter((key) => key !== 'status');
-		const oldMetadataKeys = oldMetadata ? Object.keys(oldMetadata).filter((key) => key !== 'status') : [];
+		const oldMetadataKeys = oldMetadata
+			? Object.keys(oldMetadata).filter((key) => key !== 'status')
+			: [];
 
 		// 削除されたキーを特定
 		const deletedKeys = oldMetadataKeys.filter((key) => !(key in newMetadata));

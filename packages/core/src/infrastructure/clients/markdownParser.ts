@@ -86,7 +86,15 @@ export class MarkdownParser {
 		const warnings: string[] = [];
 
 		// ASTを走査
-		this.walkNodes(tree.children, headingStack, headings, tasks, frontmatterLineCount, content, config);
+		this.walkNodes(
+			tree.children,
+			headingStack,
+			headings,
+			tasks,
+			frontmatterLineCount,
+			content,
+			config,
+		);
 
 		// 重複タスクを検出
 		this.detectDuplicates(tasks, warnings);
@@ -208,7 +216,15 @@ export class MarkdownParser {
 				// 子リストがあれば処理（通常のリスト内のチェックボックス）
 				for (const child of item.children) {
 					if (child.type === 'list') {
-						this.processList(child, headingStack, tasks, lineOffset, content, config, isInBlockquote);
+						this.processList(
+							child,
+							headingStack,
+							tasks,
+							lineOffset,
+							content,
+							config,
+							isInBlockquote,
+						);
 					}
 				}
 				continue;
@@ -247,8 +263,13 @@ export class MarkdownParser {
 		for (const child of item.children) {
 			if (child.type === 'paragraph' && title === '') {
 				// positionからオリジナルのMarkdownを抽出
-				if (child.position?.start.offset !== undefined && child.position?.end.offset !== undefined) {
-					let rawTitle = content.slice(child.position.start.offset, child.position.end.offset).trim();
+				if (
+					child.position?.start.offset !== undefined &&
+					child.position?.end.offset !== undefined
+				) {
+					let rawTitle = content
+						.slice(child.position.start.offset, child.position.end.offset)
+						.trim();
 					// チェックボックスパターンを除去（mdastのParagraphにはチェックボックスが含まれる）
 					rawTitle = rawTitle.replace(/^\[[ xX]\]\s*/, '');
 					title = rawTitle;
@@ -361,7 +382,9 @@ export class MarkdownParser {
 	 * ノードからテキストを抽出
 	 */
 	private extractTextFromNodes(
-		nodes: Array<RootContent | Text | Paragraph | { type: string; children?: unknown[]; value?: string }>,
+		nodes: Array<
+			RootContent | Text | Paragraph | { type: string; children?: unknown[]; value?: string }
+		>,
 	): string {
 		let text = '';
 
